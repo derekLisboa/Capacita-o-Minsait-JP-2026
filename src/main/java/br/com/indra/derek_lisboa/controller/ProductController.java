@@ -22,34 +22,30 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<Product> create(@Valid @RequestBody ProductDTO dto){
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(productService.create(dto));
+    public ResponseEntity<ProductDTO> create(@Valid @RequestBody ProductDTO dto){
+        ProductDTO created = productService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAll(){
+    public ResponseEntity<List<ProductDTO>> getAll(){
         return ResponseEntity.ok(productService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable UUID id){
+    public ResponseEntity<ProductDTO> getById(@PathVariable UUID id){
         return ResponseEntity.ok(productService.getById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(
-            @PathVariable UUID id,
-            @Valid @RequestBody ProductDTO dto
-    ){
+    public ResponseEntity<ProductDTO> update(@PathVariable UUID id,
+                                             @Valid @RequestBody ProductDTO dto){
         return ResponseEntity.ok(productService.update(id, dto));
     }
 
     @PatchMapping("/{id}/price")
-    public ResponseEntity<Product> updatePrice(
-            @PathVariable UUID id,
-            @RequestParam BigDecimal price
-    ){
+    public ResponseEntity<ProductDTO> updatePrice(@PathVariable UUID id,
+                                                  @RequestParam BigDecimal price){
         return ResponseEntity.ok(productService.updatePrice(id, price));
     }
 

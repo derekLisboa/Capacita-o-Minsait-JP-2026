@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +24,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final PriceHistoryRepository priceHistoryRepository;
 
-    public Product create(ProductDTO dto) {
-
+    public ProductDTO create(ProductDTO dto) {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
 
@@ -35,21 +35,26 @@ public class ProductService {
         product.setBarCode(dto.getBarCode());
         product.setCategory(category);
 
-        return productsRepository.save(product);
+        Product saved = productsRepository.save(product);
+        return toDTO(saved);
     }
 
-    public List<Product> getAll() {
-        return productsRepository.findAll();
+    public List<ProductDTO> getAll() {
+        return productsRepository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Product getById(UUID id) {
-        return productsRepository.findById(id)
+    public ProductDTO getById(UUID id) {
+        Product product = productsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+        return toDTO(product);
     }
 
-    public Product update(UUID id, ProductDTO dto) {
-
-        Product product = getById(id);
+    public ProductDTO update(UUID id, ProductDTO dto) {
+        Product product = productsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
@@ -60,46 +65,54 @@ public class ProductService {
         product.setBarCode(dto.getBarCode());
         product.setCategory(category);
 
-        return productsRepository.save(product);
+        Product updated = productsRepository.save(product);
+        return toDTO(updated);
     }
 
     public void delete(UUID id) {
-        Product product = getById(id);
+        Product product = productsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
         productsRepository.delete(product);
     }
 
-    public Product updatePrice(UUID id, BigDecimal price) {
-
-        Product product = getById(id);
+    public ProductDTO updatePrice(UUID id, BigDecimal price) {
+        Product product = productsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
         BigDecimal oldPrice = product.getPrice();
-
         product.setPrice(price);
 
-        PriceHistory history = new PriceHistory();
+        // salvar histórico
+        var history = new br.com.indra.derek_lisboa.model.PriceHistory();
         history.setProduct(product);
         history.setOldPrice(oldPrice);
         history.setNewPrice(price);
-
         priceHistoryRepository.save(history);
 
-        return productsRepository.save(product);
+        Product updated = productsRepository.save(product);
+        return toDTO(updated);
     }
 
     public List<ProductHistoryDTO> getPriceHistory(UUID productId) {
-
-        List<PriceHistory> history = priceHistoryRepository
-                .findByProduct_Id(productId);
-
-        return history.stream()
+        return priceHistoryRepository.findByProduct_Id(productId)
+                .stream()
                 .map(h -> ProductHistoryDTO.builder()
                         .id(h.getId())
-                        .product(h.getProduct().getName()) // ou productName se você mudou
+                        .product(h.getProduct().getName())
                         .oldPrice(h.getOldPrice())
                         .newPrice(h.getNewPrice())
                         .registerDate(h.getAlterationDate())
-                        .build()
-                )
-                .toList();
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private ProductDTO toDTO(Product product){
+        ProductDTO dto = new ProductDTO();
+        dto.setName(product.getName());
+        dto.setBrand(product.getBrand());
+        dto.setPrice(product.getPrice());
+        dto.setBarCode(product.getBarCode());
+        dto.setCategoryId(product.getCategory().getId());
+        return dto;
     }
 }
