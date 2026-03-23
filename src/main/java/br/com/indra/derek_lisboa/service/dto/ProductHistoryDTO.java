@@ -13,11 +13,11 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class HistoricoProdutoDTO {
+public class ProductHistoryDTO {
 
     private UUID id;
-    private String produto;
-    private BigDecimal precoAntigo;
-    private BigDecimal precoNovo;
-    private LocalDateTime dataRegistro;
+    private String product;
+    private BigDecimal oldPrice;
+    private BigDecimal newPrice;
+    private LocalDateTime registerDate;
 }

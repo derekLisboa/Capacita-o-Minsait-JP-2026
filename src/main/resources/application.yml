@@ -10,9 +10,9 @@ spring:
       ddl-auto: update
 
   datasource:
-    url: ${URL_DB:jdbc:oracle:thin:@localhost:1521/xe}
-    username: ${USERNAME_DB:system}
-    password: ${PASSWORD_DB:19032911Derek}
+    url: ${URL_DB:jdbc:oracle:thin:@localhost:1521:xe}
+    username: JP_CAPACITACAO
+    password: 123
     driverClassName: oracle.jdbc.driver.OracleDriver
 
   server:
