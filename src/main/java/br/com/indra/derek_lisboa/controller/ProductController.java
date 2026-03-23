@@ -1,6 +1,5 @@
 package br.com.indra.derek_lisboa.controller;
 
-import br.com.indra.derek_lisboa.model.Product;
 import br.com.indra.derek_lisboa.service.ProductService;
 import br.com.indra.derek_lisboa.service.dto.ProductHistoryDTO;
 import br.com.indra.derek_lisboa.service.dto.ProductDTO;
@@ -15,8 +14,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/products")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService productService;
@@ -24,7 +23,7 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductDTO> create(@Valid @RequestBody ProductDTO dto){
         ProductDTO created = productService.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -38,15 +37,21 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> update(@PathVariable UUID id,
-                                             @Valid @RequestBody ProductDTO dto){
-        return ResponseEntity.ok(productService.update(id, dto));
+    public ResponseEntity<ProductDTO> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductDTO dto
+    ){
+        ProductDTO updated = productService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @PatchMapping("/{id}/price")
-    public ResponseEntity<ProductDTO> updatePrice(@PathVariable UUID id,
-                                                  @RequestParam BigDecimal price){
-        return ResponseEntity.ok(productService.updatePrice(id, price));
+    public ResponseEntity<ProductDTO> updatePrice(
+            @PathVariable UUID id,
+            @RequestParam BigDecimal price
+    ){
+        ProductDTO updated = productService.updatePrice(id, price);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -58,5 +63,25 @@ public class ProductController {
     @GetMapping("/{id}/price-history")
     public ResponseEntity<List<ProductHistoryDTO>> getPriceHistory(@PathVariable UUID id){
         return ResponseEntity.ok(productService.getPriceHistory(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDTO>> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category
+    ){
+        List<ProductDTO> results;
+
+        if (name != null && category != null) {
+            results = productService.searchByNameAndCategory(name, category);
+        } else if (name != null) {
+            results = productService.searchByName(name);
+        } else if (category != null) {
+            results = productService.searchByCategory(category);
+        } else {
+            results = productService.getAll();
+        }
+
+        return ResponseEntity.ok(results);
     }
 }

@@ -1,7 +1,6 @@
 package br.com.indra.derek_lisboa.service;
 
 import br.com.indra.derek_lisboa.model.Category;
-import br.com.indra.derek_lisboa.model.PriceHistory;
 import br.com.indra.derek_lisboa.model.Product;
 import br.com.indra.derek_lisboa.repository.CategoryRepository;
 import br.com.indra.derek_lisboa.repository.PriceHistoryRepository;
@@ -25,6 +24,8 @@ public class ProductService {
     private final PriceHistoryRepository priceHistoryRepository;
 
     public ProductDTO create(ProductDTO dto) {
+        validateProductDTO(dto);
+
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
 
@@ -53,6 +54,8 @@ public class ProductService {
     }
 
     public ProductDTO update(UUID id, ProductDTO dto) {
+        validateProductDTO(dto);
+
         Product product = productsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
@@ -76,13 +79,16 @@ public class ProductService {
     }
 
     public ProductDTO updatePrice(UUID id, BigDecimal price) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Preço deve ser maior que zero");
+        }
+
         Product product = productsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
         BigDecimal oldPrice = product.getPrice();
         product.setPrice(price);
 
-        // salvar histórico
         var history = new br.com.indra.derek_lisboa.model.PriceHistory();
         history.setProduct(product);
         history.setOldPrice(oldPrice);
@@ -105,7 +111,7 @@ public class ProductService {
                         .build())
                 .collect(Collectors.toList());
     }
-
+    //Conversão para DTO
     private ProductDTO toDTO(Product product){
         ProductDTO dto = new ProductDTO();
         dto.setName(product.getName());
@@ -114,5 +120,38 @@ public class ProductService {
         dto.setBarCode(product.getBarCode());
         dto.setCategoryId(product.getCategory().getId());
         return dto;
+    }
+
+    public List<ProductDTO> searchByName(String name) {
+        return productsRepository.findByName(name)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductDTO> searchByCategory(String category) {
+        return productsRepository.findByCategoryName(category)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductDTO> searchByNameAndCategory(String name, String category) {
+        return productsRepository.findByNameAndCategoryName(name, category)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private void validateProductDTO(ProductDTO dto) {
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new RuntimeException("Nome do produto é obrigatório");
+        }
+        if (dto.getBrand() == null || dto.getBrand().isBlank()) {
+            throw new RuntimeException("Marca do produto é obrigatória");
+        }
+        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Preço deve ser maior que zero");
+        }
     }
 }
