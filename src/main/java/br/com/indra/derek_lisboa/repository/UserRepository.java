@@ -1,14 +1,15 @@
 package br.com.indra.derek_lisboa.repository;
 
-import br.com.indra.derek_lisboa.model.Category;
+import br.com.indra.derek_lisboa.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, UUID> {
+public interface UserRepository extends JpaRepository<User, UUID> {
 
-    boolean existsByName(String name);
+    Optional<User> findByEmail(String email);
 
 }
