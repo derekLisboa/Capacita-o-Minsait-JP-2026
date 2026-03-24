@@ -37,6 +37,7 @@ public class ProductService {
         product.setPrice(dto.getPrice());
         product.setBarCode(dto.getBarCode());
         product.setCategory(category);
+        product.setStock(dto.getStock());
 
         Product saved = productsRepository.save(product);
         return toDTO(saved);
@@ -70,6 +71,7 @@ public class ProductService {
         product.setBrand(dto.getBrand());
         product.setPrice(dto.getPrice());
         product.setBarCode(dto.getBarCode());
+        product.setStock(dto.getStock());
 
         Product updated = productsRepository.save(product);
         return toDTO(updated);
@@ -85,12 +87,14 @@ public class ProductService {
         if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidProductPriceException("O Preço deve ser maior que zero");
         }
-
         if (dto.getBarCode() != null) {
             Optional<Product> existing = productsRepository.findByBarCode(dto.getBarCode());
             if (existing.isPresent() && !existing.get().getId().equals(product.getId())) {
                 throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
             }
+        }
+        if (dto.getStock() == null || dto.getStock() < 0) {
+            throw new InvalidQuantityException("A quantidade no estoque deve ser maior ou igual a zero");
         }
     }
 
@@ -141,7 +145,9 @@ public class ProductService {
         dto.setBrand(product.getBrand());
         dto.setPrice(product.getPrice());
         dto.setBarCode(product.getBarCode());
+        dto.setStock(product.getStock());
         dto.setCategoryId(product.getCategory().getId());
+
         return dto;
     }
 
@@ -178,6 +184,9 @@ public class ProductService {
         }
         if (dto.getBarCode() != null && productsRepository.existsByBarCode(dto.getBarCode())) {
             throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
+        }
+        if (dto.getStock() == null || dto.getStock() < 0) {
+            throw new InvalidQuantityException("Quantidade no estoque deve ser maior ou igual a zero");
         }
     }
 }

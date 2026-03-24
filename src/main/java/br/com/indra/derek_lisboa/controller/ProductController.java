@@ -33,6 +33,7 @@ public class ProductController {
     @GetMapping
     @Operation(summary = "Listar produtos", description = "Retorna uma lista com todos os produtos cadastrados")
     public ResponseEntity<List<ProductDTO>> getAll(){
+
         return ResponseEntity.ok(productService.getAll());
     }
 

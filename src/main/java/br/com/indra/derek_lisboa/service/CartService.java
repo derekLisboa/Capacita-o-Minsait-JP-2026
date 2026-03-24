@@ -4,11 +4,10 @@ import br.com.indra.derek_lisboa.exception.InsufficientStockException;
 import br.com.indra.derek_lisboa.exception.InvalidQuantityException;
 import br.com.indra.derek_lisboa.exception.InvalidUserException;
 import br.com.indra.derek_lisboa.exception.ProductNotFoundException;
-import br.com.indra.derek_lisboa.model.Cart;
-import br.com.indra.derek_lisboa.model.CartItem;
-import br.com.indra.derek_lisboa.model.Product;
-import br.com.indra.derek_lisboa.model.User;
+import br.com.indra.derek_lisboa.model.*;
+import br.com.indra.derek_lisboa.model.enums.TransactionType;
 import br.com.indra.derek_lisboa.repository.CartRepository;
+import br.com.indra.derek_lisboa.repository.InventoryTransactionRepository;
 import br.com.indra.derek_lisboa.repository.ProductRepository;
 import br.com.indra.derek_lisboa.repository.UserRepository;
 import br.com.indra.derek_lisboa.service.dto.CartDTO;
@@ -17,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +28,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final InventoryTransactionRepository inventoryTransactionRepository;
 
     public Cart getOrCreateCart(String email) {
         User user = userRepository.findByEmail(email)
@@ -56,19 +57,21 @@ public class CartService {
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst();
 
-        int quantidadeNoCarrinho = existingItem.map(CartItem::getQuantity).orElse(0);
+        int quantityAlreadyInCart = existingItem.map(CartItem::getQuantity).orElse(0);
+        int totalRequested = quantityAlreadyInCart + quantity;
 
-        int totalDesejado = quantidadeNoCarrinho + quantity;
-
-        if (totalDesejado > product.getStock()) {
+        if (totalRequested > product.getStock()) {
             throw new InsufficientStockException(
                     "Estoque insuficiente. Disponível: " + product.getStock()
             );
         }
 
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
+
         if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
-            item.setQuantity(totalDesejado);
+            item.setQuantity(totalRequested);
         } else {
             CartItem item = new CartItem();
             item.setProduct(product);
@@ -77,6 +80,14 @@ public class CartService {
 
             cart.getItems().add(item);
         }
+
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setProduct(product);
+        transaction.setQuantity(quantity);
+        transaction.setType(TransactionType.EXIT);
+        transaction.setCreatedAt(LocalDateTime.now());
+
+        inventoryTransactionRepository.save(transaction);
 
         return cartRepository.save(cart);
     }
@@ -119,14 +130,29 @@ public class CartService {
                 .orElseThrow(() -> new ProductNotFoundException("Produto nao esta no carrinho"));
 
         if (quantity > item.getQuantity()) {
-            throw new InvalidQuantityException("Quantidade para remover maior do que a que tem no carrinho");
+            throw new InvalidQuantityException(
+                    "Quantidade para remover maior do que a que tem no carrinho"
+            );
         }
+
+        Product product = item.getProduct();
+
+        product.setStock(product.getStock() + quantity);
+        productRepository.save(product);
 
         if (quantity.equals(item.getQuantity())) {
             cart.getItems().remove(item);
         } else {
             item.setQuantity(item.getQuantity() - quantity);
         }
+
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setProduct(product);
+        transaction.setQuantity(quantity);
+        transaction.setType(TransactionType.ENTRY);
+        transaction.setCreatedAt(LocalDateTime.now());
+
+        inventoryTransactionRepository.save(transaction);
 
         return cartRepository.save(cart);
     }

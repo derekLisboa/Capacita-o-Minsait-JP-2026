@@ -42,4 +42,8 @@ public class ProductDTO {
     @Schema(description = "ID da categoria do produto", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
     private UUID categoryId;
 
+    @NotNull
+    @Schema(description = "Quantidade do produto em estoque", example = "5")
+    private Integer stock;
+
 }
