@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.service;
 
+import br.com.indra.derek_lisboa.exception.*;
 import br.com.indra.derek_lisboa.model.Category;
 import br.com.indra.derek_lisboa.model.Product;
 import br.com.indra.derek_lisboa.repository.CategoryRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,7 +29,7 @@ public class ProductService {
         validateProductDTO(dto);
 
         Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                .orElseThrow(() -> new CategoryNotFoundException("Categoria não encontrada"));
 
         Product product = new Product();
         product.setName(dto.getName());
@@ -49,42 +51,62 @@ public class ProductService {
 
     public ProductDTO getById(UUID id) {
         Product product = productsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProductNotFoundException("Produto não encontrado"));
         return toDTO(product);
     }
 
     public ProductDTO update(UUID id, ProductDTO dto) {
-        validateProductDTO(dto);
 
         Product product = productsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProductNotFoundException("Produto nao encontrado"));
+
+        validateProductDTOForUpdate(product, dto);
 
         Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
+        product.setCategory(category);
 
         product.setName(dto.getName());
         product.setBrand(dto.getBrand());
         product.setPrice(dto.getPrice());
         product.setBarCode(dto.getBarCode());
-        product.setCategory(category);
 
         Product updated = productsRepository.save(product);
         return toDTO(updated);
     }
 
+    private void validateProductDTOForUpdate(Product product, ProductDTO dto) {
+        if (dto.getName() == null || dto.getName().isBlank()) {
+            throw new InvalidProductNameException("O Nome do produto é obrigatório");
+        }
+        if (dto.getBrand() == null || dto.getBrand().isBlank()) {
+            throw new InvalidProductBrandException("A Marca do produto é obrigatória");
+        }
+        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidProductPriceException("O Preço deve ser maior que zero");
+        }
+
+        if (dto.getBarCode() != null) {
+            Optional<Product> existing = productsRepository.findByBarCode(dto.getBarCode());
+            if (existing.isPresent() && !existing.get().getId().equals(product.getId())) {
+                throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
+            }
+        }
+    }
+
     public void delete(UUID id) {
         Product product = productsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProductNotFoundException("Produto nao encontrado"));
         productsRepository.delete(product);
     }
 
     public ProductDTO updatePrice(UUID id, BigDecimal price) {
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Preço deve ser maior que zero");
+            throw new InvalidProductPriceException("O Preço deve ser maior que zero");
         }
 
         Product product = productsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ProductNotFoundException("Produto nao encontrado"));
 
         BigDecimal oldPrice = product.getPrice();
         product.setPrice(price);
@@ -111,9 +133,10 @@ public class ProductService {
                         .build())
                 .collect(Collectors.toList());
     }
-    //Conversão para DTO
+
     private ProductDTO toDTO(Product product){
         ProductDTO dto = new ProductDTO();
+        dto.setId(product.getId());
         dto.setName(product.getName());
         dto.setBrand(product.getBrand());
         dto.setPrice(product.getPrice());
@@ -145,13 +168,16 @@ public class ProductService {
 
     private void validateProductDTO(ProductDTO dto) {
         if (dto.getName() == null || dto.getName().isBlank()) {
-            throw new RuntimeException("Nome do produto é obrigatório");
+            throw new InvalidProductNameException("O Nome do produto é obrigatório");
         }
         if (dto.getBrand() == null || dto.getBrand().isBlank()) {
-            throw new RuntimeException("Marca do produto é obrigatória");
+            throw new InvalidProductBrandException("A Marca do produto é obrigatória");
         }
         if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Preço deve ser maior que zero");
+            throw new InvalidProductPriceException("O Preço deve ser maior que zero");
+        }
+        if (dto.getBarCode() != null && productsRepository.existsByBarCode(dto.getBarCode())) {
+            throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
         }
     }
 }
