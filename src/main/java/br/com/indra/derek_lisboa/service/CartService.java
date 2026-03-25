@@ -7,13 +7,13 @@ import br.com.indra.derek_lisboa.exception.ProductNotFoundException;
 import br.com.indra.derek_lisboa.model.*;
 import br.com.indra.derek_lisboa.model.enums.TransactionType;
 import br.com.indra.derek_lisboa.repository.CartRepository;
-import br.com.indra.derek_lisboa.repository.InventoryTransactionRepository;
 import br.com.indra.derek_lisboa.repository.ProductRepository;
 import br.com.indra.derek_lisboa.repository.UserRepository;
 import br.com.indra.derek_lisboa.service.dto.CartDTO;
 import br.com.indra.derek_lisboa.service.dto.CartItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final InventoryTransactionRepository inventoryTransactionRepository;
+    private final InventoryTransactionService inventoryTransactionService;
 
     public Cart getOrCreateCart(String email) {
         User user = userRepository.findByEmail(email)
@@ -42,6 +42,7 @@ public class CartService {
                 });
     }
 
+    @Transactional
     public Cart addProduct(String email, UUID productId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
@@ -81,13 +82,7 @@ public class CartService {
             cart.getItems().add(item);
         }
 
-        InventoryTransaction transaction = new InventoryTransaction();
-        transaction.setProduct(product);
-        transaction.setQuantity(quantity);
-        transaction.setType(TransactionType.EXIT);
-        transaction.setCreatedAt(LocalDateTime.now());
-
-        inventoryTransactionRepository.save(transaction);
+        inventoryTransactionService.registerExit(product, quantity);
 
         return cartRepository.save(cart);
     }
@@ -116,6 +111,7 @@ public class CartService {
                 .build();
     }
 
+    @Transactional
     public Cart removeProduct(String email, UUID productId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
@@ -146,13 +142,7 @@ public class CartService {
             item.setQuantity(item.getQuantity() - quantity);
         }
 
-        InventoryTransaction transaction = new InventoryTransaction();
-        transaction.setProduct(product);
-        transaction.setQuantity(quantity);
-        transaction.setType(TransactionType.ENTRY);
-        transaction.setCreatedAt(LocalDateTime.now());
-
-        inventoryTransactionRepository.save(transaction);
+        inventoryTransactionService.registerEntry(product, quantity);
 
         return cartRepository.save(cart);
     }

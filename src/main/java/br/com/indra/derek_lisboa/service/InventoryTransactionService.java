@@ -1,11 +1,14 @@
 package br.com.indra.derek_lisboa.service;
 
 import br.com.indra.derek_lisboa.model.InventoryTransaction;
+import br.com.indra.derek_lisboa.model.Product;
+import br.com.indra.derek_lisboa.model.enums.TransactionType;
 import br.com.indra.derek_lisboa.repository.InventoryTransactionRepository;
 import br.com.indra.derek_lisboa.service.dto.InventoryTransactionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +31,28 @@ public class InventoryTransactionService {
                 .filter(t -> t.getProduct().getId().equals(productId))
                 .map(this::toDTO)
                 .toList();
+    }
+
+    public void registerExit(Product product, Integer quantity) {
+
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setProduct(product);
+        transaction.setQuantity(quantity);
+        transaction.setType(TransactionType.EXIT);
+        transaction.setCreatedAt(LocalDateTime.now());
+
+        repository.save(transaction);
+    }
+
+    public void registerEntry(Product product, Integer quantity) {
+
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setProduct(product);
+        transaction.setQuantity(quantity);
+        transaction.setType(TransactionType.ENTRY);
+        transaction.setCreatedAt(LocalDateTime.now());
+
+        repository.save(transaction);
     }
 
     private InventoryTransactionDTO toDTO(InventoryTransaction t) {
