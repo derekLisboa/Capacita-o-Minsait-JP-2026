@@ -5,7 +5,6 @@ import br.com.indra.derek_lisboa.exception.InvalidQuantityException;
 import br.com.indra.derek_lisboa.exception.InvalidUserException;
 import br.com.indra.derek_lisboa.exception.ProductNotFoundException;
 import br.com.indra.derek_lisboa.model.*;
-import br.com.indra.derek_lisboa.model.enums.TransactionType;
 import br.com.indra.derek_lisboa.repository.CartRepository;
 import br.com.indra.derek_lisboa.repository.ProductRepository;
 import br.com.indra.derek_lisboa.repository.UserRepository;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
