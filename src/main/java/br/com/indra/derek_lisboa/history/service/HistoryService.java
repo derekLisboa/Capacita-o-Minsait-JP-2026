@@ -17,14 +17,13 @@ public class HistoryService {
     public List<ProductHistoryDTO> getHistoryByProductId(UUID productId) {
         return priceHistoryRepository.findByProduct_Id(productId)
                 .stream()
-                .map(history -> ProductHistoryDTO.builder()
-                        .id(history.getId())
-                        .product(history.getProduct().getName())
-                        .oldPrice(history.getOldPrice())
-                        .newPrice(history.getNewPrice())
-                        .registerDate(history.getAlterationDate())
-                        .build()
-                )
+                .map(history -> new ProductHistoryDTO(
+                        history.getId(),
+                        history.getProduct().getName(),
+                        history.getOldPrice(),
+                        history.getNewPrice(),
+                        history.getAlterationDate()
+                ))
                 .toList();
     }
 }

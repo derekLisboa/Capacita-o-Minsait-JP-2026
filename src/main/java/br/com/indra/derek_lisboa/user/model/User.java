@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.user.model;
 
+import br.com.indra.derek_lisboa.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,5 +27,7 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 }

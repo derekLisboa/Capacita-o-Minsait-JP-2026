@@ -10,16 +10,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ProductHistoryDTO {
 
-    private UUID id;
-    private String product;
-    private BigDecimal oldPrice;
-    private BigDecimal newPrice;
-    private LocalDateTime registerDate;
-}
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ProductHistoryDTO(
+
+    UUID id,
+    String product,
+    BigDecimal oldPrice,
+    BigDecimal newPrice,
+    LocalDateTime registerDate)
+
+{}

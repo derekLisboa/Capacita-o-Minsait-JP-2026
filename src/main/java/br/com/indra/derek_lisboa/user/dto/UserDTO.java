@@ -1,23 +1,21 @@
 package br.com.indra.derek_lisboa.user.dto;
 
+import br.com.indra.derek_lisboa.user.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserDTO {
+@Schema(description = "Dados do usuário")
+public record UserDTO(
 
-    @Schema(description = "Email do usuario", example = "teste@exemplo.com")
-    @NotBlank(message = "O email é obrigatorio")
-    private String email;
+        @Schema(description = "Email do usuario", example = "teste@exemplo.com")
+        @NotBlank(message = "O email é obrigatorio")
+        @Email(message = "Email invalido")
+        String email,
 
-    @Schema(description = "Cargo", example = "User, Admin")
-    @NotBlank(message = "O cargo é obrigatorio")
-    private String role;
-}
+        @Schema(description = "Cargo do usuário", example = "USER")
+        @NotNull(message = "O cargo é obrigatorio")
+        UserRole role
+
+) {}

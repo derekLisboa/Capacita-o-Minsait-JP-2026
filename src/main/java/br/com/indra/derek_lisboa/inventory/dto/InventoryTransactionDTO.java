@@ -1,6 +1,10 @@
 package br.com.indra.derek_lisboa.inventory.dto;
 
+import br.com.indra.derek_lisboa.inventory.enums.TransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,28 +13,30 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Schema(description = "Transaçoes")
-public class InventoryTransactionDTO {
+public record InventoryTransactionDTO(
 
-    @Schema(description = "ID da transaçao", example = "a1b2c3d4-e5f6-7890-abcd-123456789000")
-    private UUID id;
+        @Schema(description = "ID da transaçao", example = "a1b2c3d4-e5f6-7890-abcd-123456789000")
+        UUID id,
 
-    @Schema(description = "ID do produto", example = "04b7ee82-c5ca-427e-8f30-6d50662c9e28")
-    private UUID productId;
+        @Schema(description = "ID do produto", example = "04b7ee82-c5ca-427e-8f30-6d50662c9e28")
+        @NotNull(message = "O ID do produto é obrigatorio")
+        UUID productId,
 
-    @Schema(description = "Nome do produto", example = "SSD 1Tb")
-    private String productName;
+        @Schema(description = "Nome do produto", example = "SSD 1Tb")
+        @NotBlank(message = "O nome do produto é obrigatorio")
+        String productName,
 
-    @Schema(description = "Quantidade movimentada", example = "2")
-    private Integer quantity;
+        @Schema(description = "Quantidade movimentada", example = "2")
+        @NotNull(message = "A quantidade é obrigatoria")
+        @Positive(message = "A quantidade deve ser maior que zero")
+        Integer quantity,
 
-    @Schema(description = "Tipo da movimentaçao (ENTRY = entrada, EXIT = saida)", example = "EXIT")
-    private String type;
+        @Schema(description = "Tipo da movimentação (ENTRY = entrada, EXIT = saída)", example = "EXIT")
+        @NotNull(message = "O tipo é obrigatorio")
+        TransactionType type,
 
-    @Schema(description = "Data da movimentação", example = "2026-03-24T13:45:00")
-    private LocalDateTime createdAt;
-}
+        @Schema(description = "Data da movimentaçao", example = "2026-03-24T13:45:00")
+        LocalDateTime createdAt
+
+) {}

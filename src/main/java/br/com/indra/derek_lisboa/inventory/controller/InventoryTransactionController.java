@@ -18,29 +18,22 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
-@Tag(name = "Estoque", description = "Histórico de movimentações de estoque")
+@Tag(name = "Estoque", description = "Historico de movimentaçoes de estoque")
 public class InventoryTransactionController {
 
     private final InventoryTransactionService service;
 
     @GetMapping
-    @Operation(summary = "Listar movimentaçoes",
-            description = "Retorna o histórico de entradas e saidas de estoque"
-    )
+    @Operation(summary = "Listar movimentaçoes", description = "Retorna o historico de entradas e saidas de estoque")
     public ResponseEntity<List<InventoryTransactionDTO>> findAll() {
-
         return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping("/product/{productId}")
-    @Operation(summary = "Buscar movimentações por produto",
-            description = "Retorna o histórico de movimentações de um produto específico"
-    )
+    @GetMapping("/products/{productId}")
+    @Operation(summary = "Buscar movimentaçoes por produto", description = "Retorna o historico de movimentaçoes de um produto específico")
     public ResponseEntity<List<InventoryTransactionDTO>> findByProduct(
 
-            @Parameter(description = "ID do produto",
-                    example = "04b7ee82-c5ca-427e-8f30-6d50662c9e28"
-            )
+            @Parameter(description = "ID do produto", example = "04b7ee82-c5ca-427e-8f30-6d50662c9e28")
             @PathVariable UUID productId
     ) {
         return ResponseEntity.ok(service.findByProduct(productId));

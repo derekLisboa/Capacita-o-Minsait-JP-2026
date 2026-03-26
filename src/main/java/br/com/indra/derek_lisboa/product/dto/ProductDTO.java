@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,38 +13,27 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "Produto")
-public class ProductDTO {
+public record ProductDTO(
 
-    @Schema(description = "ID do produto", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-    private UUID id;
+        UUID id,
 
-    @NotBlank(message = "O email é obrigatorio")
-    @Schema(description = "Nome do produto", example = "Memória RAM 32Gb")
-    private String name;
+        @NotBlank(message = "O nome é obrigatorio")
+        String name,
 
-    @NotBlank(message = "A marca é obrigatoria")
-    @Schema(description = "Marca do produto", example = "HyperX")
-    private String brand;
+        @NotBlank(message = "A marca é obrigatoria")
+        String brand,
 
-    @NotNull
-    @Positive
-    @Schema(description = "Preço do produto", example = "5999.99")
-    private BigDecimal price;
+        @NotNull(message = "O preço é obrigatorio")
+        @Positive(message = "O preço deve ser maior que zero")
+        BigDecimal price,
 
-    @Schema(description = "Código de barras do produto", example = "1234567890123")
-    private String barCode;
+        String barCode,
 
-    @NotNull
-    @Schema(description = "ID da categoria do produto", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-    private UUID categoryId;
+        @NotNull(message = "O estoque é obrigatorio")
+        @PositiveOrZero(message = "O estoque deve ser maior ou igual a 0")
+        Integer stock,
 
-    @NotNull
-    @Schema(description = "Quantidade do produto em estoque", example = "5")
-    private Integer stock;
+        @NotNull(message = "A categoria é obrigatoria")
+        UUID categoryId
 
-}
+) {}

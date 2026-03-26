@@ -45,25 +45,26 @@ class ProductServiceTest {
     void shouldCreateProductSuccessfully() {
 
         UUID categoryId = UUID.randomUUID();
-
         Category category = new Category();
         category.setId(categoryId);
 
-        ProductDTO dto = new ProductDTO();
-        dto.setName("Memoria RAM 32Gb");
-        dto.setBrand("HyperX");
-        dto.setPrice(BigDecimal.valueOf(5999.99));
-        dto.setBarCode("1234567890123");
-        dto.setStock(5);
-        dto.setCategoryId(categoryId);
+        ProductDTO dto = new ProductDTO(
+                null,
+                "Memoria RAM 32Gb",
+                "HyperX",
+                BigDecimal.valueOf(5999.99),
+                "1234567890123",
+                5,
+                categoryId
+        );
 
         Product savedProduct = new Product();
         savedProduct.setId(UUID.randomUUID());
-        savedProduct.setName(dto.getName());
-        savedProduct.setBrand(dto.getBrand());
-        savedProduct.setPrice(dto.getPrice());
-        savedProduct.setBarCode(dto.getBarCode());
-        savedProduct.setStock(dto.getStock());
+        savedProduct.setName(dto.name());
+        savedProduct.setBrand(dto.brand());
+        savedProduct.setPrice(dto.price());
+        savedProduct.setBarCode(dto.barCode());
+        savedProduct.setStock(dto.stock());
         savedProduct.setCategory(category);
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
@@ -72,7 +73,7 @@ class ProductServiceTest {
         ProductDTO result = productService.create(dto);
 
         assertNotNull(result);
-        assertEquals("Memoria RAM 32Gb", result.getName());
+        assertEquals("Memoria RAM 32Gb", result.name());
 
         verify(productsRepository).save(any());
     }
@@ -80,32 +81,35 @@ class ProductServiceTest {
     @Test
     void shouldThrowExceptionWhenCategoryNotFound() {
 
-        ProductDTO dto = new ProductDTO();
-        dto.setName("Memoria RAM 32Gb");
-        dto.setBrand("HyperX");
-        dto.setPrice(BigDecimal.valueOf(5999.99));
-        dto.setStock(5);
-        dto.setCategoryId(UUID.randomUUID());
+        ProductDTO dto = new ProductDTO(
+                null,
+                "Memoria RAM 32Gb",
+                "HyperX",
+                BigDecimal.valueOf(5999.99),
+                null,
+                5,
+                UUID.randomUUID()
+        );
 
         when(categoryRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> {
-            productService.create(dto);
-        });
+        assertThrows(CategoryNotFoundException.class, () -> productService.create(dto));
     }
 
     @Test
     void shouldThrowExceptionWhenNameIsInvalid() {
 
-        ProductDTO dto = new ProductDTO();
-        dto.setName("");
-        dto.setBrand("HyperX");
-        dto.setPrice(BigDecimal.valueOf(5999.99));
-        dto.setStock(5);
+        ProductDTO dto = new ProductDTO(
+                null,
+                "",
+                "HyperX",
+                BigDecimal.valueOf(5999.99),
+                null,
+                5,
+                null
+        );
 
-        assertThrows(InvalidProductNameException.class, () -> {
-            productService.create(dto);
-        });
+        assertThrows(InvalidProductNameException.class, () -> productService.create(dto));
     }
 
     @Test
@@ -125,7 +129,6 @@ class ProductServiceTest {
         ProductDTO result = productService.updatePrice(productId, BigDecimal.valueOf(4570.99));
 
         assertEquals(BigDecimal.valueOf(4570.99), product.getPrice());
-
         verify(priceHistoryRepository).save(any());
     }
 
@@ -133,9 +136,8 @@ class ProductServiceTest {
     void shouldThrowExceptionWhenPriceIsInvalid() {
         UUID id = UUID.randomUUID();
 
-        assertThrows(InvalidProductPriceException.class, () -> {
-            productService.updatePrice(id, BigDecimal.ZERO);
-        });
+        assertThrows(InvalidProductPriceException.class,
+                () -> productService.updatePrice(id, BigDecimal.ZERO));
     }
 
     @Test
@@ -144,8 +146,7 @@ class ProductServiceTest {
 
         when(productsRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> {
-            productService.updatePrice(id, new BigDecimal("5999.99"));
-        });
+        assertThrows(ProductNotFoundException.class,
+                () -> productService.updatePrice(id, new BigDecimal("5999.99")));
     }
 }

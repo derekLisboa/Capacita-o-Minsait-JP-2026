@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,20 +21,21 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-@Tag(name = "Autenticação", description = "Login de usuarios")
+@Tag(name = "Autenticaçao", description = "Login de usuarios")
 public class AuthController {
 
     private final JWTUtil jwtUtil;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    @Operation(summary = "Login", description = "Autenticação do usuario para retornar o token JWT")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginDTO dto) {
+    @Operation(summary = "Login", description = "Autenticaçao do usuario para retornar o token JWT")
+    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginDTO dto) {
 
-        var user = userService.findByEmail(dto.getEmail());
+        var user = userService.findByEmail(dto.email());
 
-        if (!user.getPassword().equals(dto.getPassword())) {
-            throw new InvalidPasswordException("Senha invalida");
+        if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
+            throw new InvalidPasswordException("Senha inválida");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
@@ -43,10 +45,14 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Cadastrar usuario", description = "Criar um novo usuario no sistema")
-    public ResponseEntity<String> register(@RequestBody User user) {
+    public ResponseEntity<String> register(@RequestBody @Valid User user) {
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userService.save(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuario cadastrado com sucesso");
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body("Usuario cadastrado com sucesso");
     }
 }

@@ -18,8 +18,17 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public void save(User user) {
-        userRepository.save(user);
+    public User save(User user) {
+
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new InvalidUserException("O email é obrigatorio");
+        }
+
+        if (user.getRole() == null) {
+            throw new InvalidUserException("O cargo é obrigatorio");
+        }
+
+        return userRepository.save(user);
     }
 
     public User findByEmail(String email) {
@@ -27,11 +36,11 @@ public class UserService {
                 .orElseThrow(() -> new InvalidUserException("Usuario nao encontrado"));
     }
 
-    public List<UserDTO> getAll() {
+    public List<UserDTO> findAll() {
         return userRepository.findAll()
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private UserDTO toDTO(User user) {

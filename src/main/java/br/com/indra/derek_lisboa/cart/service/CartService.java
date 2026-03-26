@@ -91,26 +91,30 @@ public class CartService {
 
     public CartDTO toDTO(Cart cart) {
 
-        List<CartItemDTO> items = cart.getItems().stream().map(item ->
-                CartItemDTO.builder()
-                        .productId(item.getProduct().getId())
-                        .productName(item.getProduct().getName())
-                        .brand(item.getProduct().getBrand())
-                        .price(item.getProduct().getPrice())
-                        .quantity(item.getQuantity())
-                        .build()
-        ).toList();
+        List<CartItemDTO> items = cart.getItems().stream()
+                .map(this::toItemDTO)
+                .toList();
 
         BigDecimal total = items.stream()
-                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                .map(i -> i.price().multiply(BigDecimal.valueOf(i.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return CartDTO.builder()
-                .id(cart.getId())
-                .userEmail(cart.getUser().getEmail())
-                .items(items)
-                .total(total)
-                .build();
+        return new CartDTO(
+                cart.getId(),
+                cart.getUser().getEmail(),
+                items,
+                total
+        );
+    }
+
+    private CartItemDTO toItemDTO(CartItem item) {
+        return new CartItemDTO(
+                item.getProduct().getId(),
+                item.getProduct().getName(),
+                item.getProduct().getBrand(),
+                item.getProduct().getPrice(),
+                item.getQuantity()
+        );
     }
 
     @Transactional

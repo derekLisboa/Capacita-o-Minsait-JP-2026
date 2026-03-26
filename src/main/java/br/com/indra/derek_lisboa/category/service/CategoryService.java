@@ -5,12 +5,13 @@ import br.com.indra.derek_lisboa.exception.InvalidCategoryNameException;
 import br.com.indra.derek_lisboa.category.model.Category;
 import br.com.indra.derek_lisboa.category.repository.CategoryRepository;
 import br.com.indra.derek_lisboa.category.dto.CategoryDTO;
+import br.com.indra.derek_lisboa.product.dto.ProductDTO;
+import br.com.indra.derek_lisboa.product.model.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,40 +19,39 @@ public class CategoryService {
 
     private final CategoryRepository repository;
 
-    public CategoryDTO save(CategoryDTO dto) {
-        if (dto.getName() == null || dto.getName().isBlank()) {
-            throw new InvalidCategoryNameException("Nome da categoria é obrigatório");
+    public CategoryDTO create(CategoryDTO dto) {
+
+        if (repository.existsByName(dto.name())) {
+            throw new InvalidCategoryNameException("Já existe uma categoria com esse nome");
         }
 
-        Category category;
+        Category category = new Category();
+        category.setName(dto.name());
 
-        if (dto.getId() != null) {
-            category = repository.findById(dto.getId())
-                    .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
+        return toDTO(repository.save(category));
+    }
 
-            if (!category.getName().equals(dto.getName()) && repository.existsByName(dto.getName())) {
-                throw new InvalidCategoryNameException("Já existe uma categoria com esse nome");
-            }
+    public CategoryDTO update(UUID id, CategoryDTO dto) {
 
-            category.setName(dto.getName());
-        } else {
-            if (repository.existsByName(dto.getName())) {
-                throw new InvalidCategoryNameException("Já existe uma categoria com esse nome");
-            }
+        Category category = repository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
 
-            category = new Category();
-            category.setName(dto.getName());
+        if (!category.getName().equals(dto.name()) &&
+                repository.existsByName(dto.name())) {
+
+            throw new InvalidCategoryNameException("Já existe uma categoria com esse nome");
         }
 
-        Category saved = repository.save(category);
-        return toDTO(saved);
+        category.setName(dto.name());
+
+        return toDTO(repository.save(category));
     }
 
     public List<CategoryDTO> findAll() {
         return repository.findAll()
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public CategoryDTO findById(UUID id) {
@@ -67,9 +67,9 @@ public class CategoryService {
     }
 
     private CategoryDTO toDTO(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(category.getId());
-        dto.setName(category.getName());
-        return dto;
+        return new CategoryDTO(
+                category.getId(),
+                category.getName()
+        );
     }
 }

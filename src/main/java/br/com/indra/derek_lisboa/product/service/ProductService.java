@@ -29,26 +29,26 @@ public class ProductService {
     public ProductDTO create(ProductDTO dto) {
         validateProductDTO(dto);
 
-        Category category = categoryRepository.findById(dto.getCategoryId())
+        Category category = categoryRepository.findById(dto.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException("Categoria não encontrada"));
 
         Product product = new Product();
-        product.setName(dto.getName());
-        product.setBrand(dto.getBrand());
-        product.setPrice(dto.getPrice());
-        product.setBarCode(dto.getBarCode());
+        product.setName(dto.name());
+        product.setBrand(dto.brand());
+        product.setPrice(dto.price());
+        product.setBarCode(dto.barCode());
         product.setCategory(category);
-        product.setStock(dto.getStock());
+        product.setStock(dto.stock());
 
         Product saved = productsRepository.save(product);
         return toDTO(saved);
     }
 
-    public List<ProductDTO> getAll() {
+    public List<ProductDTO> findAll() {
         return productsRepository.findAll()
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ProductDTO getById(UUID id) {
@@ -64,37 +64,37 @@ public class ProductService {
 
         validateProductDTOForUpdate(product, dto);
 
-        Category category = categoryRepository.findById(dto.getCategoryId())
+        Category category = categoryRepository.findById(dto.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
         product.setCategory(category);
 
-        product.setName(dto.getName());
-        product.setBrand(dto.getBrand());
-        product.setPrice(dto.getPrice());
-        product.setBarCode(dto.getBarCode());
-        product.setStock(dto.getStock());
+        product.setName(dto.name());
+        product.setBrand(dto.brand());
+        product.setPrice(dto.price());
+        product.setBarCode(dto.barCode());
+        product.setStock(dto.stock());
 
         Product updated = productsRepository.save(product);
         return toDTO(updated);
     }
 
     private void validateProductDTOForUpdate(Product product, ProductDTO dto) {
-        if (dto.getName() == null || dto.getName().isBlank()) {
+        if (dto.name() == null || dto.name().isBlank()) {
             throw new InvalidProductNameException("O Nome do produto é obrigatório");
         }
-        if (dto.getBrand() == null || dto.getBrand().isBlank()) {
+        if (dto.brand() == null || dto.brand().isBlank()) {
             throw new InvalidProductBrandException("A Marca do produto é obrigatória");
         }
-        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.price() == null || dto.price().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidProductPriceException("O Preço deve ser maior que zero");
         }
-        if (dto.getBarCode() != null) {
-            Optional<Product> existing = productsRepository.findByBarCode(dto.getBarCode());
+        if (dto.barCode() != null) {
+            Optional<Product> existing = productsRepository.findByBarCode(dto.barCode());
             if (existing.isPresent() && !existing.get().getId().equals(product.getId())) {
                 throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
             }
         }
-        if (dto.getStock() == null || dto.getStock() < 0) {
+        if (dto.stock() == null || dto.stock() < 0) {
             throw new InvalidQuantityException("A quantidade no estoque deve ser maior ou igual a zero");
         }
     }
@@ -129,64 +129,63 @@ public class ProductService {
     public List<ProductHistoryDTO> getPriceHistory(UUID productId) {
         return priceHistoryRepository.findByProduct_Id(productId)
                 .stream()
-                .map(h -> ProductHistoryDTO.builder()
-                        .id(h.getId())
-                        .product(h.getProduct().getName())
-                        .oldPrice(h.getOldPrice())
-                        .newPrice(h.getNewPrice())
-                        .registerDate(h.getAlterationDate())
-                        .build())
-                .collect(Collectors.toList());
+                .map(h -> new ProductHistoryDTO(
+                        h.getId(),
+                        h.getProduct().getName(),
+                        h.getOldPrice(),
+                        h.getNewPrice(),
+                        h.getAlterationDate()
+                ))
+                .toList();
     }
 
     private ProductDTO toDTO(Product product){
-        ProductDTO dto = new ProductDTO();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setBrand(product.getBrand());
-        dto.setPrice(product.getPrice());
-        dto.setBarCode(product.getBarCode());
-        dto.setStock(product.getStock());
-        dto.setCategoryId(product.getCategory().getId());
-
-        return dto;
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getPrice(),
+                product.getBarCode(),
+                product.getStock(),
+                product.getCategory().getId()
+        );
     }
 
     public List<ProductDTO> searchByName(String name) {
         return productsRepository.findByName(name)
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<ProductDTO> searchByCategory(String category) {
         return productsRepository.findByCategoryName(category)
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<ProductDTO> searchByNameAndCategory(String name, String category) {
         return productsRepository.findByNameAndCategoryName(name, category)
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private void validateProductDTO(ProductDTO dto) {
-        if (dto.getName() == null || dto.getName().isBlank()) {
+        if (dto.name() == null || dto.name().isBlank()) {
             throw new InvalidProductNameException("O Nome do produto é obrigatório");
         }
-        if (dto.getBrand() == null || dto.getBrand().isBlank()) {
+        if (dto.brand() == null || dto.brand().isBlank()) {
             throw new InvalidProductBrandException("A Marca do produto é obrigatória");
         }
-        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+        if (dto.price() == null || dto.price().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidProductPriceException("O Preço deve ser maior que zero");
         }
-        if (dto.getBarCode() != null && productsRepository.existsByBarCode(dto.getBarCode())) {
+        if (dto.barCode() != null && productsRepository.existsByBarCode(dto.barCode())) {
             throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
         }
-        if (dto.getStock() == null || dto.getStock() < 0) {
+        if (dto.stock() == null || dto.stock() < 0) {
             throw new InvalidQuantityException("Quantidade no estoque deve ser maior ou igual a zero");
         }
     }

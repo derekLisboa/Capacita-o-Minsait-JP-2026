@@ -34,9 +34,9 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "Listar produtos", description = "Retorna uma lista com todos os produtos cadastrados")
-    public ResponseEntity<List<ProductDTO>> getAll(){
+    public ResponseEntity<List<ProductDTO>> findAll(){
 
-        return ResponseEntity.ok(productService.getAll());
+        return ResponseEntity.ok(productService.findAll());
     }
 
     @GetMapping("/{id}")
@@ -93,7 +93,7 @@ public class ProductController {
         } else if (category != null) {
             results = productService.searchByCategory(category);
         } else {
-            results = productService.getAll();
+            results = productService.findAll();
         }
 
         return ResponseEntity.ok(results);

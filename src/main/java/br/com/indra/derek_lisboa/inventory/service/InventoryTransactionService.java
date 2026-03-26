@@ -26,9 +26,8 @@ public class InventoryTransactionService {
     }
 
     public List<InventoryTransactionDTO> findByProduct(UUID productId) {
-        return repository.findAll()
+        return repository.findByProduct_Id(productId)
                 .stream()
-                .filter(t -> t.getProduct().getId().equals(productId))
                 .map(this::toDTO)
                 .toList();
     }
@@ -56,13 +55,13 @@ public class InventoryTransactionService {
     }
 
     private InventoryTransactionDTO toDTO(InventoryTransaction t) {
-        return InventoryTransactionDTO.builder()
-                .id(t.getId())
-                .productId(t.getProduct().getId())
-                .productName(t.getProduct().getName())
-                .quantity(t.getQuantity())
-                .type(t.getType().name())
-                .createdAt(t.getCreatedAt())
-                .build();
+        return new InventoryTransactionDTO(
+                t.getId(),
+                t.getProduct().getId(),
+                t.getProduct().getName(),
+                t.getQuantity(),
+                t.getType(),
+                t.getCreatedAt()
+        );
     }
 }
