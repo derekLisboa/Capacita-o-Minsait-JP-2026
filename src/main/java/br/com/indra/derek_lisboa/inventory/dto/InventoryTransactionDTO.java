@@ -39,4 +39,5 @@ public record InventoryTransactionDTO(
         @Schema(description = "Data da movimentaçao", example = "2026-03-24T13:45:00")
         LocalDateTime createdAt
 
-) {}
+) {
+}

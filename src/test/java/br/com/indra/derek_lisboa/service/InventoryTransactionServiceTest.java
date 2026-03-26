@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,29 +33,29 @@ class InventoryTransactionServiceTest {
     private InventoryTransactionRepository repository;
 
     @Test
-    void shouldReturnAllTransactions(){
+    void shouldReturnAllTransactions() {
 
         Product product = new Product();
         product.setId(UUID.randomUUID());
         product.setName("Memoria RAM 32Gb");
 
-        InventoryTransaction inventoryTransaction = new InventoryTransaction();
-        inventoryTransaction.setId(UUID.randomUUID());
-        inventoryTransaction.setProduct(product);
-        inventoryTransaction.setQuantity(5);
-        inventoryTransaction.setType(TransactionType.ENTRY);
-        inventoryTransaction.setCreatedAt(LocalDateTime.now());
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setId(UUID.randomUUID());
+        transaction.setProduct(product);
+        transaction.setQuantity(5);
+        transaction.setType(TransactionType.ENTRY);
+        transaction.setCreatedAt(LocalDateTime.now());
 
-        when(repository.findAll()).thenReturn(List.of(inventoryTransaction));;
+        when(repository.findAll()).thenReturn(List.of(transaction));
 
         List<InventoryTransactionDTO> result = service.findAll();
 
         assertEquals(1, result.size());
-        assertEquals("Memoria RAM 32Gb", result.get(0).getProductName());
+        assertEquals("Memoria RAM 32Gb", result.get(0).productName());
     }
 
     @Test
-    void shouldReturnTransactionsByProduct(){
+    void shouldReturnTransactionsByProduct() {
 
         UUID id = UUID.randomUUID();
 
@@ -78,17 +79,16 @@ class InventoryTransactionServiceTest {
         it2.setType(TransactionType.ENTRY);
         it2.setCreatedAt(LocalDateTime.now());
 
-        when(repository.findAll()).thenReturn(List.of(it1, it2));
+        when(repository.findByProduct_Id(id)).thenReturn(List.of(it1));
 
         List<InventoryTransactionDTO> result = service.findByProduct(id);
 
         assertEquals(1, result.size());
-        assertEquals("SSD 1Tb", result.get(0).getProductName());
-
+        assertEquals("SSD 1Tb", result.get(0).productName());
     }
 
     @Test
-    void shouldRegisterEntryTransaction(){
+    void shouldRegisterEntryTransaction() {
 
         Product product = new Product();
         product.setId(UUID.randomUUID());
@@ -96,8 +96,9 @@ class InventoryTransactionServiceTest {
 
         ArgumentCaptor<InventoryTransaction> captor = ArgumentCaptor.forClass(InventoryTransaction.class);
 
-        service.registerEntry(product, 5);
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
+        service.registerEntry(product, 5);
 
         verify(repository).save(captor.capture());
 
@@ -110,13 +111,15 @@ class InventoryTransactionServiceTest {
     }
 
     @Test
-    void shouldRegisterExitTransaction(){
+    void shouldRegisterExitTransaction() {
 
         Product product = new Product();
         product.setId(UUID.randomUUID());
         product.setName("SSD 1Tb");
 
         ArgumentCaptor<InventoryTransaction> captor = ArgumentCaptor.forClass(InventoryTransaction.class);
+
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         service.registerExit(product, 5);
 
@@ -129,5 +132,4 @@ class InventoryTransactionServiceTest {
         assertEquals(TransactionType.EXIT, saved.getType());
         assertNotNull(saved.getCreatedAt());
     }
-
 }

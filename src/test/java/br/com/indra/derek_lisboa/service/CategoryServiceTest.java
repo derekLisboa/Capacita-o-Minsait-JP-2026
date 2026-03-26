@@ -33,44 +33,39 @@ class CategoryServiceTest {
     @Test
     void shouldCreateCategorySuccessfully() {
 
-        CategoryDTO dto = new CategoryDTO();
-        dto.setName("SSD");
+        CategoryDTO dto = new CategoryDTO(null, "SSD");
 
         Category category = new Category();
         category.setId(UUID.randomUUID());
         category.setName("SSD");
 
         when(repository.existsByName("SSD")).thenReturn(false);
-        when(repository.save(any(Category.class))).thenReturn(category);
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        CategoryDTO result = categoryService.save(dto);
+        CategoryDTO result = categoryService.create(dto);
 
         assertNotNull(result);
-        assertEquals("SSD", result.getName());
+        assertEquals("SSD", result.name());
     }
 
     @Test
     void shouldThrowExceptionWhenNameIsInvalid() {
 
-        CategoryDTO dto = new CategoryDTO();
-        dto.setName("");
+        CategoryDTO dto = new CategoryDTO(null, "");
 
-        assertThrows(InvalidCategoryNameException.class, () -> {
-            categoryService.save(dto);
-        });
+        assertThrows(InvalidCategoryNameException.class,
+                () -> categoryService.create(dto));
     }
 
     @Test
     void shouldThrowExceptionWhenNameAlreadyExistsOnCreate() {
 
-        CategoryDTO dto = new CategoryDTO();
-        dto.setName("SSD");
+        CategoryDTO dto = new CategoryDTO(null, "SSD");
 
         when(repository.existsByName("SSD")).thenReturn(true);
 
-        assertThrows(InvalidCategoryNameException.class, () -> {
-            categoryService.save(dto);
-        });
+        assertThrows(InvalidCategoryNameException.class,
+                () -> categoryService.create(dto));
     }
 
     @Test
@@ -78,9 +73,7 @@ class CategoryServiceTest {
 
         UUID id = UUID.randomUUID();
 
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(id);
-        dto.setName("SSD NVME");
+        CategoryDTO dto = new CategoryDTO(id, "SSD NVME");
 
         Category category = new Category();
         category.setId(id);
@@ -88,37 +81,30 @@ class CategoryServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(category));
         when(repository.existsByName("SSD NVME")).thenReturn(false);
-        when(repository.save(any(Category.class))).thenAnswer(i -> i.getArgument(0));
+        when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        CategoryDTO result = categoryService.save(dto);
+        CategoryDTO result = categoryService.update(id, dto);
 
-        assertEquals("SSD NVME", result.getName());
+        assertEquals("SSD NVME", result.name());
     }
 
     @Test
     void shouldThrowExceptionWhenCategoryNotFoundOnUpdate() {
 
         UUID id = UUID.randomUUID();
-
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(id);
-        dto.setName("SSD");
+        CategoryDTO dto = new CategoryDTO(id, "SSD");
 
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.save(dto);
-        });
+        assertThrows(CategoryNotFoundException.class,
+                () -> categoryService.update(id, dto));
     }
 
     @Test
     void shouldThrowExceptionWhenNameAlreadyExistsOnUpdate() {
 
         UUID id = UUID.randomUUID();
-
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(id);
-        dto.setName("SSD");
+        CategoryDTO dto = new CategoryDTO(id, "SSD");
 
         Category category = new Category();
         category.setId(id);
@@ -127,9 +113,8 @@ class CategoryServiceTest {
         when(repository.findById(id)).thenReturn(Optional.of(category));
         when(repository.existsByName("SSD")).thenReturn(true);
 
-        assertThrows(InvalidCategoryNameException.class, () -> {
-            categoryService.save(dto);
-        });
+        assertThrows(InvalidCategoryNameException.class,
+                () -> categoryService.update(id, dto));
     }
 
     @Test
@@ -158,7 +143,7 @@ class CategoryServiceTest {
 
         CategoryDTO result = categoryService.findById(id);
 
-        assertEquals("SSD", result.getName());
+        assertEquals("SSD", result.name());
     }
 
     @Test
@@ -168,9 +153,8 @@ class CategoryServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.findById(id);
-        });
+        assertThrows(CategoryNotFoundException.class,
+                () -> categoryService.findById(id));
     }
 
     @Test
@@ -195,9 +179,7 @@ class CategoryServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.delete(id);
-        });
-
+        assertThrows(CategoryNotFoundException.class,
+                () -> categoryService.delete(id));
     }
 }

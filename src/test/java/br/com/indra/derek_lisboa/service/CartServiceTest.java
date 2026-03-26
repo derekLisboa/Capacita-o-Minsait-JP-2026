@@ -63,15 +63,17 @@ class CartServiceTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-        when(cartRepository.save(any())).thenReturn(cart);
+        when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Cart result = cartService.addProduct(email, productId, 2);
 
         assertNotNull(result);
         assertEquals(3, product.getStock());
+        assertEquals(1, cart.getItems().size());
+        assertEquals(2, cart.getItems().get(0).getQuantity());
 
         verify(inventoryTransactionService).registerExit(product, 2);
-
     }
 
     @Test
@@ -95,17 +97,14 @@ class CartServiceTest {
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
-        assertThrows(InsufficientStockException.class, () -> {
-            cartService.addProduct(email, productId, 5);
-        });
+        assertThrows(InsufficientStockException.class,
+                () -> cartService.addProduct(email, productId, 5));
     }
 
     @Test
     void shouldThrowExceptionWhenQuantityIsInvalid() {
-
-        assertThrows(InvalidQuantityException.class, () -> {
-            cartService.addProduct("email", UUID.randomUUID(), 0);
-        });
+        assertThrows(InvalidQuantityException.class,
+                () -> cartService.addProduct("email", UUID.randomUUID(), 0));
     }
 
     @Test
@@ -129,12 +128,12 @@ class CartServiceTest {
         cart.setUser(user);
         cart.setItems(new ArrayList<>());
         cart.getItems().add(item);
-
         item.setCart(cart);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any())).thenReturn(cart);
+        when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Cart result = cartService.removeProduct(email, productId, 2);
 
@@ -166,12 +165,12 @@ class CartServiceTest {
         cart.setUser(user);
         cart.setItems(new ArrayList<>());
         cart.getItems().add(item);
-
         item.setCart(cart);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
-        when(cartRepository.save(any())).thenReturn(cart);
+        when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
         Cart result = cartService.removeProduct(email, productId, 2);
 
@@ -204,20 +203,17 @@ class CartServiceTest {
         cart.setUser(user);
         cart.setItems(new ArrayList<>());
         cart.getItems().add(item);
-
         item.setCart(cart);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
 
-        assertThrows(InvalidQuantityException.class, () -> {
-            cartService.removeProduct(email, productId, 5);
-        });
+        assertThrows(InvalidQuantityException.class,
+                () -> cartService.removeProduct(email, productId, 5));
 
         assertEquals(5, product.getStock());
 
         verify(inventoryTransactionService, never())
                 .registerEntry(any(), any());
     }
-
 }
