@@ -14,11 +14,11 @@ import java.util.UUID;
 @Schema(description = "Categoria do produto")
 public record CategoryDTO(
 
-    @Schema(description = "ID da categoria", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-    UUID id,
+        UUID id,
 
-    @NotBlank(message = "O nome da categoria é obrigatoio")
-    @Schema(description = "Nome da categoria", example = "SSD")
-    String name)
+        @NotBlank(message = "O nome da categoria é obrigatorio")
+        String name,
 
-{}
+        UUID parentId
+
+) {}

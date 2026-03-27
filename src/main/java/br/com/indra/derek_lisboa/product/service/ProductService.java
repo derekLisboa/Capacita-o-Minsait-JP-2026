@@ -11,6 +11,7 @@ import br.com.indra.derek_lisboa.product.dto.ProductDTO;
 import br.com.indra.derek_lisboa.history.dto.ProductHistoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -27,16 +29,17 @@ public class ProductService {
     private final PriceHistoryRepository priceHistoryRepository;
 
     public ProductDTO create(ProductDTO dto) {
+
         validateProductDTO(dto);
 
         Category category = categoryRepository.findById(dto.categoryId())
                 .orElseThrow(() -> new CategoryNotFoundException("Categoria não encontrada"));
 
         Product product = new Product();
-        product.setName(dto.name());
-        product.setBrand(dto.brand());
+        product.setName(dto.name().trim());
+        product.setBrand(dto.brand().trim());
         product.setPrice(dto.price());
-        product.setBarCode(dto.barCode());
+        product.setBarCode(dto.barCode() != null ? dto.barCode().trim() : null);
         product.setCategory(category);
         product.setStock(dto.stock());
 
@@ -68,10 +71,10 @@ public class ProductService {
                 .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
         product.setCategory(category);
 
-        product.setName(dto.name());
-        product.setBrand(dto.brand());
+        product.setName(dto.name().trim());
+        product.setBrand(dto.brand().trim());
         product.setPrice(dto.price());
-        product.setBarCode(dto.barCode());
+        product.setBarCode(dto.barCode() != null ? dto.barCode().trim() : null);
         product.setStock(dto.stock());
 
         Product updated = productsRepository.save(product);
@@ -79,23 +82,15 @@ public class ProductService {
     }
 
     private void validateProductDTOForUpdate(Product product, ProductDTO dto) {
-        if (dto.name() == null || dto.name().isBlank()) {
-            throw new InvalidProductNameException("O Nome do produto é obrigatório");
-        }
-        if (dto.brand() == null || dto.brand().isBlank()) {
-            throw new InvalidProductBrandException("A Marca do produto é obrigatória");
-        }
-        if (dto.price() == null || dto.price().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidProductPriceException("O Preço deve ser maior que zero");
-        }
         if (dto.barCode() != null) {
             Optional<Product> existing = productsRepository.findByBarCode(dto.barCode());
-            if (existing.isPresent() && !existing.get().getId().equals(product.getId())) {
-                throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
+
+            if (existing.isPresent() &&
+                    !existing.get().getId().equals(product.getId())) {
+
+                throw new InvalidProductBarCodeException(
+                        "Já existe um produto com esse código de barras");
             }
-        }
-        if (dto.stock() == null || dto.stock() < 0) {
-            throw new InvalidQuantityException("A quantidade no estoque deve ser maior ou igual a zero");
         }
     }
 
@@ -116,13 +111,15 @@ public class ProductService {
         BigDecimal oldPrice = product.getPrice();
         product.setPrice(price);
 
+        Product updated = productsRepository.save(product);
+
         var history = new PriceHistory();
-        history.setProduct(product);
+        history.setProduct(updated);
         history.setOldPrice(oldPrice);
         history.setNewPrice(price);
+
         priceHistoryRepository.save(history);
 
-        Product updated = productsRepository.save(product);
         return toDTO(updated);
     }
 
@@ -152,41 +149,29 @@ public class ProductService {
     }
 
     public List<ProductDTO> searchByName(String name) {
-        return productsRepository.findByName(name)
+        return productsRepository.findByNameContainingIgnoreCase(name.trim())
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
     public List<ProductDTO> searchByCategory(String category) {
-        return productsRepository.findByCategoryName(category)
+        return productsRepository.findByCategory_NameContainingIgnoreCase(category.trim())
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
     public List<ProductDTO> searchByNameAndCategory(String name, String category) {
-        return productsRepository.findByNameAndCategoryName(name, category)
+        return productsRepository.findByNameContainingIgnoreCaseAndCategory_NameContainingIgnoreCase(name.trim(), category.trim())
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
     private void validateProductDTO(ProductDTO dto) {
-        if (dto.name() == null || dto.name().isBlank()) {
-            throw new InvalidProductNameException("O Nome do produto é obrigatório");
-        }
-        if (dto.brand() == null || dto.brand().isBlank()) {
-            throw new InvalidProductBrandException("A Marca do produto é obrigatória");
-        }
-        if (dto.price() == null || dto.price().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InvalidProductPriceException("O Preço deve ser maior que zero");
-        }
         if (dto.barCode() != null && productsRepository.existsByBarCode(dto.barCode())) {
             throw new InvalidProductBarCodeException("Já existe um produto com esse código de barras");
-        }
-        if (dto.stock() == null || dto.stock() < 0) {
-            throw new InvalidQuantityException("Quantidade no estoque deve ser maior ou igual a zero");
         }
     }
 }

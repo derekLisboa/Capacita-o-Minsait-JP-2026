@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.category.service;
 
+import br.com.indra.derek_lisboa.exception.CategoryDeletionException;
 import br.com.indra.derek_lisboa.exception.CategoryNotFoundException;
 import br.com.indra.derek_lisboa.exception.InvalidCategoryNameException;
 import br.com.indra.derek_lisboa.category.model.Category;
@@ -7,26 +8,52 @@ import br.com.indra.derek_lisboa.category.repository.CategoryRepository;
 import br.com.indra.derek_lisboa.category.dto.CategoryDTO;
 import br.com.indra.derek_lisboa.product.dto.ProductDTO;
 import br.com.indra.derek_lisboa.product.model.Product;
+import br.com.indra.derek_lisboa.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository repository;
+    private final ProductRepository productRepository;
+
+    private Category resolveParent(UUID parentId) {
+        if (parentId == null) {
+            return null;
+        }
+
+        return repository.findById(parentId)
+                .orElseThrow(() ->
+                        new CategoryNotFoundException("Categoria pai nao encontrada"));
+    }
+
+    private void validateDuplicate(Category category) {
+        if (repository.existsByNameIgnoreCaseAndParent(
+                category.getName(),
+                category.getParent())) {
+
+            throw new InvalidCategoryNameException("Ja existe categoria com esse nome neste nivel");
+        }
+    }
 
     public CategoryDTO create(CategoryDTO dto) {
 
-        if (repository.existsByName(dto.name())) {
-            throw new InvalidCategoryNameException("Já existe uma categoria com esse nome");
-        }
+        Category parent = resolveParent(dto.parentId());
 
         Category category = new Category();
-        category.setName(dto.name());
+        String name = dto.name().trim();
+        category.setName(name);
+        category.setParent(parent);
+
+        validateDuplicate(category);
 
         return toDTO(repository.save(category));
     }
@@ -36,13 +63,30 @@ public class CategoryService {
         Category category = repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
 
-        if (!category.getName().equals(dto.name()) &&
-                repository.existsByName(dto.name())) {
+        Category parent = resolveParent(dto.parentId());
 
-            throw new InvalidCategoryNameException("Já existe uma categoria com esse nome");
+        if (parent != null && category.getId().equals(parent.getId())) {
+            throw new InvalidCategoryNameException(
+                    "Categoria nao pode ser pai dela mesma");
         }
 
-        category.setName(dto.name());
+        String newName = dto.name().trim();
+
+        boolean changed =
+                !category.getName().equalsIgnoreCase(newName) ||
+                        !Objects.equals(category.getParent(), parent);
+
+        if (changed &&
+                repository.existsByNameIgnoreCaseAndParent(newName, parent)) {
+
+            throw new InvalidCategoryNameException(
+                    "Ja existe categoria com esse nome neste nivel");
+        }
+
+
+
+        category.setName(newName);
+        category.setParent(parent);
 
         return toDTO(repository.save(category));
     }
@@ -63,13 +107,25 @@ public class CategoryService {
     public void delete(UUID id) {
         Category category = repository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Categoria nao encontrada"));
+
+        if (repository.existsByParent(category)) {
+            throw new CategoryDeletionException(
+                    "Nao é possivel deletar categoria que possui subcategorias");
+        }
+        if (productRepository.existsByCategory(category)) {
+            throw new CategoryDeletionException(
+                    "Nao é possivel deletar categoria com produtos associados");
+        }
+
         repository.delete(category);
     }
 
     private CategoryDTO toDTO(Category category) {
         return new CategoryDTO(
                 category.getId(),
-                category.getName()
+                category.getName(),
+                category.getParent() != null ? category.getParent().getId() : null
         );
     }
+
 }

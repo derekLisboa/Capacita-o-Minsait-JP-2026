@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.product.repository;
 
+import br.com.indra.derek_lisboa.category.model.Category;
 import br.com.indra.derek_lisboa.product.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,9 +16,14 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Optional<Product> findByBarCode(String barCode);
 
-    List<Product> findByName(String name);
+    List<Product> findByNameContainingIgnoreCase(String name);
 
-    List<Product> findByCategoryName(String categoryName);
+    List<Product> findByCategory_NameContainingIgnoreCase(String categoryName);
 
-    List<Product> findByNameAndCategoryName(String name, String categoryName);
+    List<Product> findByNameContainingIgnoreCaseAndCategory_NameContainingIgnoreCase(
+            String name,
+            String categoryName
+    );
+
+    boolean existsByCategory(Category category);
 }

@@ -34,13 +34,13 @@ public class CategoryController {
 
     @GetMapping
     @Operation(summary = "Buscar categorias", description = "Retorna uma lista com todas as categorias cadastradas")
-    public ResponseEntity<List<CategoryDTO>> getAll() {
+    public ResponseEntity<List<CategoryDTO>> findAll() {
         return ResponseEntity.ok(categoryService.findAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar categoria por ID", description = "Retorna uma categoria pelo ID")
-    public ResponseEntity<CategoryDTO> getById(@PathVariable UUID id) {
+    public ResponseEntity<CategoryDTO> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(categoryService.findById(id));
     }
 
