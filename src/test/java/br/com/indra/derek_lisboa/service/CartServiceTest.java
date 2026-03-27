@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.service;
 
+import br.com.indra.derek_lisboa.dto.CartDTO;
 import br.com.indra.derek_lisboa.enums.CartStatus;
 import br.com.indra.derek_lisboa.exception.InsufficientStockException;
 import br.com.indra.derek_lisboa.exception.InvalidQuantityException;
@@ -69,7 +70,7 @@ class CartServiceTest {
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Cart result = cartService.addProduct(email, productId, 2);
+        CartDTO result = cartService.addProduct(email, productId, 2);
 
         assertNotNull(result);
         assertEquals(3, product.getStock());
@@ -145,7 +146,7 @@ class CartServiceTest {
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Cart result = cartService.removeProduct(email, productId, 2);
+        CartDTO result = cartService.removeProduct(email, productId, 2);
 
         assertNotNull(result);
         assertEquals(7, product.getStock());
@@ -186,7 +187,7 @@ class CartServiceTest {
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Cart result = cartService.removeProduct(email, productId, 2);
+        CartDTO result = cartService.removeProduct(email, productId, 2);
 
         assertNotNull(result);
         assertEquals(7, product.getStock());

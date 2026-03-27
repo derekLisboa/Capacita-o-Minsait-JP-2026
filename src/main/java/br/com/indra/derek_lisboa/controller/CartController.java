@@ -34,9 +34,9 @@ public class CartController {
             @RequestParam Integer quantity
     ) {
 
-        Cart cart = cartService.addProduct(email, productId, quantity);
+        CartDTO cart = cartService.addProduct(email, productId, quantity);
 
-        return ResponseEntity.ok(cartService.toDTO(cart));
+        return ResponseEntity.ok(cart);
     }
 
     @GetMapping
@@ -65,8 +65,8 @@ public class CartController {
             @Parameter(description = "Quantidade para remover", example = "1")
             @RequestParam Integer quantity
     ) {
-        Cart cart = cartService.removeProduct(email, productId, quantity);
+        CartDTO cart = cartService.removeProduct(email, productId, quantity);
 
-        return ResponseEntity.ok(cartService.toDTO(cart));
+        return ResponseEntity.ok(cart);
     }
 }

@@ -47,7 +47,7 @@ public class CartService {
     }
 
     @Transactional
-    public Cart addProduct(String email, UUID productId, Integer quantity) {
+    public CartDTO addProduct(String email, UUID productId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
             throw new InvalidQuantityException("Quantidade deve ser maior que zero");
@@ -62,7 +62,12 @@ public class CartService {
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst();
 
-        int quantityAlreadyInCart = existingItem.map(CartItem::getQuantity).orElse(0);
+        int quantityAlreadyInCart = 0;
+
+        if(existingItem.isPresent()) {
+            quantityAlreadyInCart = existingItem.get().getQuantity();
+        }
+
         int totalRequested = quantityAlreadyInCart + quantity;
 
         if (totalRequested > product.getStock()) {
@@ -89,7 +94,9 @@ public class CartService {
 
         inventoryTransactionService.registerExit(product, quantity);
 
-        return cartRepository.save(cart);
+        cart = cartRepository.save(cart);
+
+        return toDTO(cart);
     }
 
     public CartDTO toDTO(Cart cart) {
@@ -98,9 +105,12 @@ public class CartService {
                 .map(this::toItemDTO)
                 .toList();
 
-        BigDecimal total = items.stream()
-                .map(i -> i.price().multiply(BigDecimal.valueOf(i.quantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (CartItemDTO item : items) {
+            BigDecimal subtotal = item.price().multiply(BigDecimal.valueOf(item.quantity()));
+            total = total.add(subtotal);
+        }
 
         return new CartDTO(
                 cart.getId(),
@@ -121,7 +131,7 @@ public class CartService {
     }
 
     @Transactional
-    public Cart removeProduct(String email, UUID productId, Integer quantity) {
+    public CartDTO removeProduct(String email, UUID productId, Integer quantity) {
 
         if (quantity == null || quantity <= 0) {
             throw new InvalidQuantityException("Quantidade deve ser maior que zero");
@@ -154,6 +164,7 @@ public class CartService {
 
         inventoryTransactionService.registerEntry(product, quantity);
 
-        return cartRepository.save(cart);
+        cart = cartRepository.save(cart);
+        return toDTO(cart);
     }
 }
