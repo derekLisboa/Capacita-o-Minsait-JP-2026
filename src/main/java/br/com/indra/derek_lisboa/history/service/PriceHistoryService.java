@@ -10,12 +10,12 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class HistoryService {
+public class PriceHistoryService {
 
     private final PriceHistoryRepository priceHistoryRepository;
 
     public List<ProductHistoryDTO> getHistoryByProductId(UUID productId) {
-        return priceHistoryRepository.findByProduct_Id(productId)
+        return priceHistoryRepository.findByProduct_IdOrderByAlterationDateDesc(productId)
                 .stream()
                 .map(history -> new ProductHistoryDTO(
                         history.getId(),

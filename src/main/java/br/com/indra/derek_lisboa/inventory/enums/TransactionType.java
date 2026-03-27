@@ -4,6 +4,7 @@ public enum TransactionType {
 
     ENTRY,
     EXIT,
-    ADJUST
-    
+    ADJUST,
+    RETURN
+
 }

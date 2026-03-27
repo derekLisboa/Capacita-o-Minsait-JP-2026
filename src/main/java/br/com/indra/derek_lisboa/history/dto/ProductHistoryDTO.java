@@ -13,11 +13,9 @@ import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ProductHistoryDTO(
-
-    UUID id,
-    String product,
-    BigDecimal oldPrice,
-    BigDecimal newPrice,
-    LocalDateTime registerDate)
-
-{}
+        UUID id,
+        String productName,
+        BigDecimal oldPrice,
+        BigDecimal newPrice,
+        LocalDateTime alterationDate
+) {}

@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.cart.service;
 
+import br.com.indra.derek_lisboa.cart.enums.CartStatus;
 import br.com.indra.derek_lisboa.cart.model.Cart;
 import br.com.indra.derek_lisboa.cart.model.CartItem;
 import br.com.indra.derek_lisboa.exception.InsufficientStockException;
@@ -32,14 +33,16 @@ public class CartService {
     private final UserRepository userRepository;
     private final InventoryTransactionService inventoryTransactionService;
 
+    @Transactional
     public Cart getOrCreateCart(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidUserException("Usuario nao encontrado"));
 
-        return cartRepository.findByUser(user)
+        return cartRepository.findByUserAndStatus(user, CartStatus.ACTIVE)
                 .orElseGet(() -> {
                     Cart cart = new Cart();
                     cart.setUser(user);
+                    cart.setStatus(CartStatus.ACTIVE);
                     return cartRepository.save(cart);
                 });
     }
@@ -79,6 +82,7 @@ public class CartService {
             CartItem item = new CartItem();
             item.setProduct(product);
             item.setQuantity(quantity);
+            item.setPriceSnapshot(product.getPrice());
             item.setCart(cart);
 
             cart.getItems().add(item);
@@ -112,7 +116,7 @@ public class CartService {
                 item.getProduct().getId(),
                 item.getProduct().getName(),
                 item.getProduct().getBrand(),
-                item.getProduct().getPrice(),
+                item.getPriceSnapshot(),
                 item.getQuantity()
         );
     }
@@ -143,6 +147,7 @@ public class CartService {
         productRepository.save(product);
 
         if (quantity.equals(item.getQuantity())) {
+            item.setCart(null);
             cart.getItems().remove(item);
         } else {
             item.setQuantity(item.getQuantity() - quantity);

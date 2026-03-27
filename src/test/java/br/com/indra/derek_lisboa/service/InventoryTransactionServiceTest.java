@@ -42,7 +42,7 @@ class InventoryTransactionServiceTest {
         InventoryTransaction transaction = new InventoryTransaction();
         transaction.setId(UUID.randomUUID());
         transaction.setProduct(product);
-        transaction.setQuantity(5);
+        transaction.setDelta(5);
         transaction.setType(TransactionType.ENTRY);
         transaction.setCreatedAt(LocalDateTime.now());
 
@@ -59,27 +59,18 @@ class InventoryTransactionServiceTest {
 
         UUID id = UUID.randomUUID();
 
-        Product product1 = new Product();
-        product1.setId(id);
-        product1.setName("SSD 1Tb");
+        Product product = new Product();
+        product.setId(id);
+        product.setName("SSD 1Tb");
 
-        Product product2 = new Product();
-        product2.setId(UUID.randomUUID());
-        product2.setName("Memoria RAM 32Gb");
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setProduct(product);
+        transaction.setDelta(5);
+        transaction.setType(TransactionType.ENTRY);
+        transaction.setCreatedAt(LocalDateTime.now());
 
-        InventoryTransaction it1 = new InventoryTransaction();
-        it1.setProduct(product1);
-        it1.setQuantity(5);
-        it1.setType(TransactionType.ENTRY);
-        it1.setCreatedAt(LocalDateTime.now());
-
-        InventoryTransaction it2 = new InventoryTransaction();
-        it2.setProduct(product2);
-        it2.setQuantity(3);
-        it2.setType(TransactionType.ENTRY);
-        it2.setCreatedAt(LocalDateTime.now());
-
-        when(repository.findByProduct_Id(id)).thenReturn(List.of(it1));
+        when(repository.findByProduct_IdOrderByCreatedAtDesc(id))
+                .thenReturn(List.of(transaction));
 
         List<InventoryTransactionDTO> result = service.findByProduct(id);
 
@@ -94,7 +85,8 @@ class InventoryTransactionServiceTest {
         product.setId(UUID.randomUUID());
         product.setName("SSD 1Tb");
 
-        ArgumentCaptor<InventoryTransaction> captor = ArgumentCaptor.forClass(InventoryTransaction.class);
+        ArgumentCaptor<InventoryTransaction> captor =
+                ArgumentCaptor.forClass(InventoryTransaction.class);
 
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -105,9 +97,8 @@ class InventoryTransactionServiceTest {
         InventoryTransaction saved = captor.getValue();
 
         assertEquals(product, saved.getProduct());
-        assertEquals(5, saved.getQuantity());
+        assertEquals(5, saved.getDelta());
         assertEquals(TransactionType.ENTRY, saved.getType());
-        assertNotNull(saved.getCreatedAt());
     }
 
     @Test
@@ -117,7 +108,8 @@ class InventoryTransactionServiceTest {
         product.setId(UUID.randomUUID());
         product.setName("SSD 1Tb");
 
-        ArgumentCaptor<InventoryTransaction> captor = ArgumentCaptor.forClass(InventoryTransaction.class);
+        ArgumentCaptor<InventoryTransaction> captor =
+                ArgumentCaptor.forClass(InventoryTransaction.class);
 
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -128,8 +120,7 @@ class InventoryTransactionServiceTest {
         InventoryTransaction saved = captor.getValue();
 
         assertEquals(product, saved.getProduct());
-        assertEquals(5, saved.getQuantity());
+        assertEquals(5, saved.getDelta());
         assertEquals(TransactionType.EXIT, saved.getType());
-        assertNotNull(saved.getCreatedAt());
     }
 }

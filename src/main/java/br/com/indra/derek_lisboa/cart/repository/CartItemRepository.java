@@ -9,5 +9,4 @@ import java.util.UUID;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
 
-
 }

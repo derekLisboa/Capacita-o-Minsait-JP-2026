@@ -50,6 +50,13 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(CategoryDeletionException.class)
+    public ResponseEntity<String> handleCategoryDeletion(CategoryNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<String> handleInvalidPassword(InvalidPasswordException ex) {
         return ResponseEntity
@@ -78,4 +85,24 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidCartException.class)
+    public ResponseEntity<String> handleInvalidCart(InvalidCartException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<String> handleInvalidOrderStatus(InvalidOrderStatusException ex){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOrderStatusException.class)
+    public ResponseEntity<String> handleOrderNotFound(OrderNotFoundException ex){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
 }

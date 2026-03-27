@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Transactional
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -28,6 +27,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final PriceHistoryRepository priceHistoryRepository;
 
+    @Transactional
     public ProductDTO create(ProductDTO dto) {
 
         validateProductDTO(dto);
@@ -60,6 +60,7 @@ public class ProductService {
         return toDTO(product);
     }
 
+    @Transactional
     public ProductDTO update(UUID id, ProductDTO dto) {
 
         Product product = productsRepository.findById(id)
@@ -94,12 +95,14 @@ public class ProductService {
         }
     }
 
+    @Transactional
     public void delete(UUID id) {
         Product product = productsRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Produto nao encontrado"));
         productsRepository.delete(product);
     }
 
+    @Transactional
     public ProductDTO updatePrice(UUID id, BigDecimal price) {
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidProductPriceException("O Preço deve ser maior que zero");
@@ -124,7 +127,7 @@ public class ProductService {
     }
 
     public List<ProductHistoryDTO> getPriceHistory(UUID productId) {
-        return priceHistoryRepository.findByProduct_Id(productId)
+        return priceHistoryRepository.findByProduct_IdOrderByAlterationDateDesc(productId)
                 .stream()
                 .map(h -> new ProductHistoryDTO(
                         h.getId(),

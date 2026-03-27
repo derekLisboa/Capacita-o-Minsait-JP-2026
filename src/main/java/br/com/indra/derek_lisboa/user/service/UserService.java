@@ -7,6 +7,7 @@ import br.com.indra.derek_lisboa.user.dto.UserDTO;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import br.com.indra.derek_lisboa.user.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public User save(User user) {
 
         if (user.getEmail() == null || user.getEmail().isBlank()) {

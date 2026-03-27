@@ -1,11 +1,13 @@
 package br.com.indra.derek_lisboa.service;
 
 import br.com.indra.derek_lisboa.category.service.CategoryService;
+import br.com.indra.derek_lisboa.exception.CategoryDeletionException;
 import br.com.indra.derek_lisboa.exception.CategoryNotFoundException;
 import br.com.indra.derek_lisboa.exception.InvalidCategoryNameException;
 import br.com.indra.derek_lisboa.category.model.Category;
 import br.com.indra.derek_lisboa.category.repository.CategoryRepository;
 import br.com.indra.derek_lisboa.category.dto.CategoryDTO;
+import br.com.indra.derek_lisboa.product.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +31,9 @@ class CategoryServiceTest {
 
     @Mock
     private CategoryRepository repository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @Test
     void shouldCreateCategorySuccessfully() {
@@ -199,6 +204,7 @@ class CategoryServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(category));
         when(repository.existsByParent(category)).thenReturn(false);
+        when(productRepository.existsByCategory(category)).thenReturn(false);
 
         categoryService.delete(id);
 
@@ -216,7 +222,23 @@ class CategoryServiceTest {
         when(repository.findById(id)).thenReturn(Optional.of(category));
         when(repository.existsByParent(category)).thenReturn(true);
 
-        assertThrows(InvalidCategoryNameException.class,
+        assertThrows(CategoryDeletionException.class,
+                () -> categoryService.delete(id));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCategoryHasProductsOnDelete() {
+
+        UUID id = UUID.randomUUID();
+
+        Category category = new Category();
+        category.setId(id);
+
+        when(repository.findById(id)).thenReturn(Optional.of(category));
+        when(repository.existsByParent(category)).thenReturn(false);
+        when(productRepository.existsByCategory(category)).thenReturn(true);
+
+        assertThrows(CategoryDeletionException.class,
                 () -> categoryService.delete(id));
     }
 

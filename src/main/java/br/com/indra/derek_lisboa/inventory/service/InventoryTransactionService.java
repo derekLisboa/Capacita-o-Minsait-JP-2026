@@ -26,32 +26,28 @@ public class InventoryTransactionService {
     }
 
     public List<InventoryTransactionDTO> findByProduct(UUID productId) {
-        return repository.findByProduct_Id(productId)
+        return repository.findByProduct_IdOrderByCreatedAtDesc(productId)
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
-    public void registerExit(Product product, Integer quantity) {
+    private void register(Product product, Integer delta, TransactionType type) {
 
         InventoryTransaction transaction = new InventoryTransaction();
         transaction.setProduct(product);
-        transaction.setQuantity(quantity);
-        transaction.setType(TransactionType.EXIT);
-        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setDelta(delta);
+        transaction.setType(type);
 
         repository.save(transaction);
     }
 
     public void registerEntry(Product product, Integer quantity) {
+        register(product, quantity, TransactionType.ENTRY);
+    }
 
-        InventoryTransaction transaction = new InventoryTransaction();
-        transaction.setProduct(product);
-        transaction.setQuantity(quantity);
-        transaction.setType(TransactionType.ENTRY);
-        transaction.setCreatedAt(LocalDateTime.now());
-
-        repository.save(transaction);
+    public void registerExit(Product product, Integer quantity) {
+        register(product, quantity, TransactionType.EXIT);
     }
 
     private InventoryTransactionDTO toDTO(InventoryTransaction t) {
@@ -59,7 +55,7 @@ public class InventoryTransactionService {
                 t.getId(),
                 t.getProduct().getId(),
                 t.getProduct().getName(),
-                t.getQuantity(),
+                t.getDelta(),
                 t.getType(),
                 t.getCreatedAt()
         );

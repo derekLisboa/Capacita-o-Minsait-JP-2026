@@ -1,9 +1,6 @@
 package br.com.indra.derek_lisboa.service;
 
-import br.com.indra.derek_lisboa.exception.CategoryNotFoundException;
-import br.com.indra.derek_lisboa.exception.InvalidProductNameException;
-import br.com.indra.derek_lisboa.exception.InvalidProductPriceException;
-import br.com.indra.derek_lisboa.exception.ProductNotFoundException;
+import br.com.indra.derek_lisboa.exception.*;
 import br.com.indra.derek_lisboa.category.model.Category;
 import br.com.indra.derek_lisboa.product.model.Product;
 import br.com.indra.derek_lisboa.product.service.ProductService;
@@ -45,6 +42,7 @@ class ProductServiceTest {
     void shouldCreateProductSuccessfully() {
 
         UUID categoryId = UUID.randomUUID();
+
         Category category = new Category();
         category.setId(categoryId);
 
@@ -93,33 +91,43 @@ class ProductServiceTest {
 
         when(categoryRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(CategoryNotFoundException.class, () -> productService.create(dto));
+        assertThrows(CategoryNotFoundException.class,
+                () -> productService.create(dto));
     }
 
     @Test
-    void shouldThrowExceptionWhenNameIsInvalid() {
+    void shouldThrowExceptionWhenBarCodeAlreadyExists() {
+
+        UUID categoryId = UUID.randomUUID();
 
         ProductDTO dto = new ProductDTO(
                 null,
-                "",
+                "Memoria RAM",
                 "HyperX",
                 BigDecimal.valueOf(5999.99),
-                null,
+                "1234567890123",
                 5,
-                null
+                categoryId
         );
 
-        assertThrows(InvalidProductNameException.class, () -> productService.create(dto));
+        when(productsRepository.existsByBarCode("1234567890123")).thenReturn(true);
+
+        assertThrows(InvalidProductBarCodeException.class,
+                () -> productService.create(dto));
     }
 
     @Test
     void shouldUpdatePriceAndCreateHistory() {
 
         UUID productId = UUID.randomUUID();
+
         Category category = new Category();
+        category.setId(UUID.randomUUID());
 
         Product product = new Product();
         product.setId(productId);
+        product.setName("Memoria");
+        product.setBrand("HyperX");
         product.setPrice(BigDecimal.valueOf(5999.99));
         product.setCategory(category);
 
@@ -128,12 +136,14 @@ class ProductServiceTest {
 
         ProductDTO result = productService.updatePrice(productId, BigDecimal.valueOf(4570.99));
 
-        assertEquals(BigDecimal.valueOf(4570.99), product.getPrice());
+        assertEquals(BigDecimal.valueOf(4570.99), result.price());
+
         verify(priceHistoryRepository).save(any());
     }
 
     @Test
     void shouldThrowExceptionWhenPriceIsInvalid() {
+
         UUID id = UUID.randomUUID();
 
         assertThrows(InvalidProductPriceException.class,
@@ -142,6 +152,7 @@ class ProductServiceTest {
 
     @Test
     void shouldThrowExceptionWhenProductNotFoundOnUpdatePrice() {
+
         UUID id = UUID.randomUUID();
 
         when(productsRepository.findById(id)).thenReturn(Optional.empty());

@@ -10,6 +10,6 @@ import java.util.UUID;
 @Repository
 public interface InventoryTransactionRepository extends JpaRepository<InventoryTransaction, UUID> {
 
-    List<InventoryTransaction> findByProduct_Id(UUID productId);
+    List<InventoryTransaction> findByProduct_IdOrderByCreatedAtDesc(UUID productId);
 
 }

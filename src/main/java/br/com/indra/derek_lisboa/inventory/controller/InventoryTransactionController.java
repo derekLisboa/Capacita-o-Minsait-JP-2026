@@ -29,7 +29,7 @@ public class InventoryTransactionController {
         return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping("/products/{productId}")
+    @GetMapping("/{productId}")
     @Operation(summary = "Buscar movimentaçoes por produto", description = "Retorna o historico de movimentaçoes de um produto específico")
     public ResponseEntity<List<InventoryTransactionDTO>> findByProduct(
 

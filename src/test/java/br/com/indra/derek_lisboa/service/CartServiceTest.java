@@ -1,5 +1,6 @@
 package br.com.indra.derek_lisboa.service;
 
+import br.com.indra.derek_lisboa.cart.enums.CartStatus;
 import br.com.indra.derek_lisboa.cart.service.CartService;
 import br.com.indra.derek_lisboa.exception.InsufficientStockException;
 import br.com.indra.derek_lisboa.exception.InvalidQuantityException;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
@@ -55,13 +57,16 @@ class CartServiceTest {
         Product product = new Product();
         product.setId(productId);
         product.setStock(5);
+        product.setPrice(BigDecimal.valueOf(100));
 
         Cart cart = new Cart();
         cart.setUser(user);
+        cart.setStatus(CartStatus.ACTIVE);
         cart.setItems(new ArrayList<>());
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserAndStatus(user, CartStatus.ACTIVE))
+                .thenReturn(Optional.of(cart));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -88,13 +93,16 @@ class CartServiceTest {
         Product product = new Product();
         product.setId(productId);
         product.setStock(1);
+        product.setPrice(BigDecimal.valueOf(100));
 
         Cart cart = new Cart();
         cart.setUser(user);
+        cart.setStatus(CartStatus.ACTIVE);
         cart.setItems(new ArrayList<>());
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserAndStatus(user, CartStatus.ACTIVE))
+                .thenReturn(Optional.of(cart));
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         assertThrows(InsufficientStockException.class,
@@ -119,19 +127,23 @@ class CartServiceTest {
         Product product = new Product();
         product.setId(productId);
         product.setStock(5);
+        product.setPrice(BigDecimal.valueOf(100));
 
         CartItem item = new CartItem();
         item.setProduct(product);
         item.setQuantity(2);
+        item.setPriceSnapshot(BigDecimal.valueOf(100));
 
         Cart cart = new Cart();
         cart.setUser(user);
+        cart.setStatus(CartStatus.ACTIVE);
         cart.setItems(new ArrayList<>());
         cart.getItems().add(item);
         item.setCart(cart);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserAndStatus(user, CartStatus.ACTIVE))
+                .thenReturn(Optional.of(cart));
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -156,19 +168,23 @@ class CartServiceTest {
         Product product = new Product();
         product.setId(productId);
         product.setStock(5);
+        product.setPrice(BigDecimal.valueOf(100));
 
         CartItem item = new CartItem();
         item.setProduct(product);
         item.setQuantity(5);
+        item.setPriceSnapshot(BigDecimal.valueOf(100));
 
         Cart cart = new Cart();
         cart.setUser(user);
+        cart.setStatus(CartStatus.ACTIVE);
         cart.setItems(new ArrayList<>());
         cart.getItems().add(item);
         item.setCart(cart);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserAndStatus(user, CartStatus.ACTIVE))
+                .thenReturn(Optional.of(cart));
         when(cartRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(productRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -194,19 +210,23 @@ class CartServiceTest {
         Product product = new Product();
         product.setId(productId);
         product.setStock(5);
+        product.setPrice(BigDecimal.valueOf(100));
 
         CartItem item = new CartItem();
         item.setProduct(product);
         item.setQuantity(2);
+        item.setPriceSnapshot(BigDecimal.valueOf(100));
 
         Cart cart = new Cart();
         cart.setUser(user);
+        cart.setStatus(CartStatus.ACTIVE);
         cart.setItems(new ArrayList<>());
         cart.getItems().add(item);
         item.setCart(cart);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(cartRepository.findByUser(user)).thenReturn(Optional.of(cart));
+        when(cartRepository.findByUserAndStatus(user, CartStatus.ACTIVE))
+                .thenReturn(Optional.of(cart));
 
         assertThrows(InvalidQuantityException.class,
                 () -> cartService.removeProduct(email, productId, 5));

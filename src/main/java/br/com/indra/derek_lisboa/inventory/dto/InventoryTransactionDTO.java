@@ -24,7 +24,6 @@ public record InventoryTransactionDTO(
         UUID productId,
 
         @Schema(description = "Nome do produto", example = "SSD 1Tb")
-        @NotBlank(message = "O nome do produto é obrigatorio")
         String productName,
 
         @Schema(description = "Quantidade movimentada", example = "2")

@@ -82,8 +82,8 @@ public class ProductController {
     @Operation(summary = "Buscar produtos", description = "Busca produtos pelo nome, por categoria ou ambos")
     public ResponseEntity<List<ProductDTO>> search(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String category
-    ){
+            @RequestParam(required = false) String category){
+
         List<ProductDTO> results;
 
         if (name != null && category != null) {
