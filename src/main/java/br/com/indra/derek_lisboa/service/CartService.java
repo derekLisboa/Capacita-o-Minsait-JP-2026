@@ -112,6 +112,7 @@ public class CartService {
             total = total.add(subtotal);
         }
 
+        
         return new CartDTO(
                 cart.getId(),
                 cart.getUser().getEmail(),
