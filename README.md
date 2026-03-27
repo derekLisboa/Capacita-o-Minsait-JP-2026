@@ -39,50 +39,52 @@ A API utiliza autenticação via **JWT (JSON Web Token)**.
 
 🧱 Estrutura do Projeto
 
-├── config              # Configurações (Security, Swagger)
-├── controller          # Endpoints da API
-├── dto                 # Objetos de transferência de dados
-├── enums               # Enumerações do sistema
-├── exception           # Tratamento de erros
-├── model               # Entidades JPA
-├── repository          # Interfaces de acesso ao banco
-├── security            # Utilitários de segurança (JWT)
-├── service             # Regras de negócio
+```
+├── config        # Configurações (Security, Swagger)
+├── controller    # Endpoints da API
+├── dto           # Objetos de transferência de dados
+├── enums         # Enumerações do sistema
+├── exception     # Tratamento de erros
+├── model         # Entidades JPA
+├── repository    # Interfaces de acesso ao banco
+├── security      # Utilitários de segurança (JWT)
+└── service       # Regras de negócio
+```
 
 ---
 
-##📚 Endpoints Principais
+## 📚 Endpoints Principais
 
-👤 Usuários
-  POST /users
-  GET /users
-  
-🔐 Autenticação
-  POST /auth/login
-  
-📦 Produtos
-  GET /products
-  POST /products
-  PUT /products/{id}
-  DELETE /products/{id}
-  
-🗂️ Categorias
-  GET /categories
-  POST /categories
-  
-🛒 Carrinho
-  GET /cart
-  POST /cart/items
-  
-📑 Pedidos
-  POST /orders
-  GET /orders
-  
-📊 Histórico de Preço
-  GET /price-history/{productId}
-  
-📦 Estoque
-  POST /inventory-transactions
+### 👤 Usuários
+- POST /users
+- GET /users
+
+### 🔐 Autenticação
+- POST /auth/login
+
+### 📦 Produtos
+- GET /products
+- POST /products
+- PUT /products/{id}
+- DELETE /products/{id}
+
+### 🗂️ Categorias
+- GET /categories
+- POST /categories
+
+### 🛒 Carrinho
+- GET /cart
+- POST /cart/items
+
+### 📑 Pedidos
+- POST /orders
+- GET /orders
+
+### 📊 Histórico de Preço
+- GET /price-history/{productId}
+
+### 📦 Estoque
+- POST /inventory-transactions
 
 ---
 
