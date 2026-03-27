@@ -15,7 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/cart")
 @RequiredArgsConstructor
-@Tag(name = "Carrinho", description = "Gerenciamento do carrinho de compras")
+@Tag(name = "Carrinho", description = "Endpoints de gerenciamento do carrinho de compras")
 public class CartController {
 
     private final CartService cartService;

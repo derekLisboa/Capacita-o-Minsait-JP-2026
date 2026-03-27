@@ -15,5 +15,9 @@ spring:
     password: 123
     driverClassName: oracle.jdbc.driver.OracleDriver
 
-  server:
-    port: 9090
+server:
+  port: 9090
+springdoc:
+  swagger-ui:
+    tagsSorter: alpha
+    operationsSorter: alpha

@@ -17,7 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
-@Tag(name = "Pedidos", description = "Gerenciamento de pedidos")
+@Tag(name = "Pedidos", description = "Endpoints de gerenciamento de pedidos")
 public class OrderController {
 
     private final OrderService orderService;

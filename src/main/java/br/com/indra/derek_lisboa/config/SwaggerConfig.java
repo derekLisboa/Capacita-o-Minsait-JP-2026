@@ -19,8 +19,8 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .components(new Components())
                 .info(new Info()
-                        .title("Derek Lisboa - API da Avaliação da Capacitação Minsait")
-                        .description("API para gerenciar produtos, categorias e histórico de preços.")
+                        .title("Derek Lisboa - API da Avaliaçao da Capacitação Minsait")
+                        .description("API para gerenciar produtos, categorias, carrinho, pedidos e historico de preços.")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name(": Derek Lisboa")
@@ -28,10 +28,7 @@ public class SwaggerConfig {
                 )
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Servidor local")
-                ))
-                .tags(List.of(
-                        new Tag().name("Categorias").description("Endpoints relacionados a categorias"),
-                        new Tag().name("Produtos").description("Endpoints relacionados a produtos")
                 ));
+
     }
 }
