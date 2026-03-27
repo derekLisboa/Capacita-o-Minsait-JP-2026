@@ -1,17 +1,15 @@
 package br.com.indra.derek_lisboa.service;
 
-import br.com.indra.derek_lisboa.cart.enums.CartStatus;
-import br.com.indra.derek_lisboa.cart.service.CartService;
+import br.com.indra.derek_lisboa.enums.CartStatus;
 import br.com.indra.derek_lisboa.exception.InsufficientStockException;
 import br.com.indra.derek_lisboa.exception.InvalidQuantityException;
-import br.com.indra.derek_lisboa.cart.model.Cart;
-import br.com.indra.derek_lisboa.cart.model.CartItem;
-import br.com.indra.derek_lisboa.inventory.service.InventoryTransactionService;
-import br.com.indra.derek_lisboa.product.model.Product;
-import br.com.indra.derek_lisboa.user.model.User;
-import br.com.indra.derek_lisboa.cart.repository.CartRepository;
-import br.com.indra.derek_lisboa.product.repository.ProductRepository;
-import br.com.indra.derek_lisboa.user.repository.UserRepository;
+import br.com.indra.derek_lisboa.model.Cart;
+import br.com.indra.derek_lisboa.model.CartItem;
+import br.com.indra.derek_lisboa.model.Product;
+import br.com.indra.derek_lisboa.model.User;
+import br.com.indra.derek_lisboa.repository.CartRepository;
+import br.com.indra.derek_lisboa.repository.ProductRepository;
+import br.com.indra.derek_lisboa.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

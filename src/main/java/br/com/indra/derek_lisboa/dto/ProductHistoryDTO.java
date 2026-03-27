@@ -1,0 +1,17 @@
+package br.com.indra.derek_lisboa.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ProductHistoryDTO(
+        UUID id,
+        String productName,
+        BigDecimal oldPrice,
+        BigDecimal newPrice,
+        LocalDateTime alterationDate
+) {}

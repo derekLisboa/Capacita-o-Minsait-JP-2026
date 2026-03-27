@@ -1,13 +1,12 @@
 package br.com.indra.derek_lisboa.service;
 
 import br.com.indra.derek_lisboa.exception.*;
-import br.com.indra.derek_lisboa.category.model.Category;
-import br.com.indra.derek_lisboa.product.model.Product;
-import br.com.indra.derek_lisboa.product.service.ProductService;
-import br.com.indra.derek_lisboa.category.repository.CategoryRepository;
-import br.com.indra.derek_lisboa.history.repository.PriceHistoryRepository;
-import br.com.indra.derek_lisboa.product.repository.ProductRepository;
-import br.com.indra.derek_lisboa.product.dto.ProductDTO;
+import br.com.indra.derek_lisboa.model.Category;
+import br.com.indra.derek_lisboa.model.Product;
+import br.com.indra.derek_lisboa.repository.CategoryRepository;
+import br.com.indra.derek_lisboa.repository.PriceHistoryRepository;
+import br.com.indra.derek_lisboa.repository.ProductRepository;
+import br.com.indra.derek_lisboa.dto.ProductDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

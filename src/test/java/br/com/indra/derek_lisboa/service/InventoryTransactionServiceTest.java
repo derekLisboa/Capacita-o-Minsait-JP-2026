@@ -1,11 +1,10 @@
 package br.com.indra.derek_lisboa.service;
 
-import br.com.indra.derek_lisboa.inventory.model.InventoryTransaction;
-import br.com.indra.derek_lisboa.inventory.service.InventoryTransactionService;
-import br.com.indra.derek_lisboa.product.model.Product;
-import br.com.indra.derek_lisboa.inventory.enums.TransactionType;
-import br.com.indra.derek_lisboa.inventory.repository.InventoryTransactionRepository;
-import br.com.indra.derek_lisboa.inventory.dto.InventoryTransactionDTO;
+import br.com.indra.derek_lisboa.model.InventoryTransaction;
+import br.com.indra.derek_lisboa.model.Product;
+import br.com.indra.derek_lisboa.enums.TransactionType;
+import br.com.indra.derek_lisboa.repository.InventoryTransactionRepository;
+import br.com.indra.derek_lisboa.dto.InventoryTransactionDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -17,7 +16,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
